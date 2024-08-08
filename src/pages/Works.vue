@@ -270,7 +270,6 @@ export default {
     },
 
     requestWorksQueue() {
-      console.log("run");
       const params = {
         order: this.sortOption.order,
         sort: this.sortOption.sort,
