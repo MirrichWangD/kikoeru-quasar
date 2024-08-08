@@ -62,16 +62,42 @@
       </q-list>
     </q-card>
 
-    <!-- 视频播放窗口 -->
+    <!-- 预览弹窗 -->
     <q-dialog v-model="showViewer" full-width>
-      <q-card class="q-pa-md" color="primary">
-        <div class="items-center" style="padding-bottom: 12px;">
-          <div class="pull-handler" @click="hideViewer" />
-        </div>
-        <div class="row items-center video-container">
-          <video v-if="showVideo" ref="video" class="video" controls autoplay />
-          <q-img v-if="!showVideo" ref="image" class="image" contain />
-        </div>
+      <!-- 视频播放 -->
+      <q-card color="primary" class="q-pa-md" v-if="showVideo">
+        <div class="pull-handler" @click="hideViewer" />
+        <q-card-section>
+          <!-- <div class="row items-center view-container" v-if="showVideo"> -->
+          <video ref="video" class="video" controls autoplay />
+          <!-- </div> -->
+        </q-card-section>
+
+      </q-card>
+      <!-- 图片查看 -->
+      <q-card color="primary" v-if="!showVideo">
+        <q-card-section>
+          <div class="row items-center no-wrap">
+            <div class="col">
+              <div class="text-h6 ellipsis">{{ preview_img_name }}</div>
+              <div class="text-subtitle2">{{ preview_img_idx + 1 }}/{{ preview_img_list.length }}</div>
+            </div>
+            <div class="col-auto">
+              <q-btn outline @click="openFile(preview_img_list[preview_img_idx])" >全屏显示</q-btn>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-img class="image" :src="preview_img_url" contain />
+        </q-card-section>
+
+
+        <q-card-actions align="around">
+          <q-btn flat label="上一个" color="primary" @click="changePreviewImg(false)" />
+          <q-btn flat label="关闭" color="negative" v-close-popup />
+          <q-btn flat label="下一个" color="primary" @click="changePreviewImg(true)" />
+        </q-card-actions>
+
       </q-card>
     </q-dialog>
     <span class="flex flex-center text-grey">&nbsp;</span>
@@ -89,6 +115,10 @@ export default {
     return {
       showViewer: false,
       showVideo: false,
+      preview_img: false,
+      preview_img_idx: 0,
+      preview_img_list: [],
+      preview_img_hash: "",
       path: []
     };
   },
@@ -126,6 +156,16 @@ export default {
       });
 
       return queue;
+    },
+
+    preview_img_url() {
+      const item = this.preview_img_list[this.preview_img_idx];
+      return item ? this.originalMediaSrc(item) : "";
+    },
+
+    preview_img_name() {
+      const item = this.preview_img_list[this.preview_img_idx];
+      return item ? item.title : "";
     },
 
     ...mapState("AudioPlayer", ["playing"]),
@@ -181,11 +221,6 @@ export default {
       const nextFileIndex = this.queue.findIndex(file => file.hash === hash);
       const nextFile = this.queue[nextFileIndex];
       const ext = this.getFileExt(nextFile.title);
-      console.log(
-        this.currentPlayingFile.title,
-        this.currentPlayingFile.hash,
-        hash
-      );
       if (ext !== "mp4") {
         if (this.currentPlayingFile.hash === hash) {
           this.$store.commit("AudioPlayer/TOGGLE_PLAYING");
@@ -223,12 +258,7 @@ export default {
     },
 
     openFile(file) {
-      console.log(file);
-      const token = this.$q.localStorage.getItem("jwt-token") || "";
-      // Fallback to old API for an old backend
-      const url = file.mediaStreamUrl
-        ? `${file.mediaStreamUrl}?token=${token}`
-        : `/api/media/stream/${file.hash}?token=${token}`;
+      const url = this.originalMediaSrc(file);
       const link = document.createElement("a");
       link.href = url;
       link.target = "_blank";
@@ -236,23 +266,44 @@ export default {
     },
 
     openViewer(file) {
-      const token = this.$q.localStorage.getItem("jwt-token") || "";
-      const url = file.mediaStreamUrl
-        ? `${file.mediaStreamUrl}?token=${token}`
-        : `/api/media/stream/${file.hash}?token=${token}`;
+      const url = this.originalMediaSrc(file);
       this.showViewer = true;
+      this.showVideo = (file.type === "image") ? false : true;
       if (file.type === "image") {
-        this.showVideo = false;
-        this.$nextTick(() => {
-          this.$refs.image.src = url;
-        });
+        this.openPreviewImg(file);
       } else {
-        this.showVideo = true;
         this.$nextTick(() => {
-          this.$refs.video.src = url;
-        });
+          this.$refs.video.src = url
+        })
       }
     },
+
+    originalMediaSrc(file) {
+      const token = this.$q.localStorage.getItem('jwt-token') || '';
+      // Fallback to old API for an old backend 
+      const url = file.mediaStreamUrl ? `${file.mediaStreamUrl}?token=${token}` : `/api/media/stream/${file.hash}?token=${token}`;
+      return url
+    },
+
+    openPreviewImg(item) {
+      const preview_img_list = this.fatherFolder.filter(item => item.type === 'image')
+      let preview_img_idx = -1;
+      preview_img_list.forEach((i, idx) => {
+        if (i.hash === item.hash) {
+          preview_img_idx = idx;
+        }
+      });
+      this.preview_img = true;
+      this.preview_img_list = preview_img_list;
+      this.preview_img_idx = preview_img_idx;
+    },
+
+    changePreviewImg(next) {
+      if (this.preview_img_list.length <= 1) return;
+      const length = this.preview_img_list.length;
+      this.preview_img_idx = (length + this.preview_img_idx + (next ? 1 : -1)) % length;
+    },
+
 
     hideViewer() {
       this.showViewer = false;
@@ -261,15 +312,6 @@ export default {
     getFileExt(val) {
       const arr = val.split(".");
       return arr[arr.length - 1];
-    },
-
-    _bindHandleFull() {
-      // const video = this.$refs.video;
-      console.log("开始播放");
-    },
-
-    _unbindHandlerFull() {
-      console.log("播放结束");
     },
 
     formatSeconds(seconds) {
@@ -322,7 +364,7 @@ export default {
   cursor: pointer;
 }
 
-.video-container {
+.view-container {
   width: 100%;
   height: 100%;
   justify-content: center;
@@ -338,6 +380,6 @@ export default {
 
 .image {
   width: 100%;
-  height: calc(100vh - 100pt);
+  height: calc(100vh - 200pt);
 }
 </style>
