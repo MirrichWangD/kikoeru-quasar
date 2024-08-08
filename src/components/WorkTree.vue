@@ -2,83 +2,26 @@
   <div class="q-ma-md">
     <q-breadcrumbs gutter="xs" v-if="path.length">
       <q-breadcrumbs-el>
-        <q-btn
-          no-caps
-          flat
-          dense
-          size="md"
-          icon="folder"
-          style="height: 30px;"
-          @click="path = []"
-          >ROOT</q-btn
-        >
+        <q-btn no-caps flat dense size="md" icon="folder" style="height: 30px;" @click="path = []">ROOT</q-btn>
       </q-breadcrumbs-el>
 
-      <q-breadcrumbs-el
-        v-for="(folderName, index) in path"
-        :key="index"
-        class="cursor-pointer"
-      >
-        <q-btn
-          no-caps
-          flat
-          dense
-          size="md"
-          icon="folder"
-          style="height: 30px;"
-          @click="onClickBreadcrumb(index)"
-          >{{ folderName }}</q-btn
-        >
+      <q-breadcrumbs-el v-for="(folderName, index) in path" :key="index" class="cursor-pointer">
+        <q-btn no-caps flat dense size="md" icon="folder" style="height: 30px;" @click="onClickBreadcrumb(index)">{{
+          folderName }}</q-btn>
       </q-breadcrumbs-el>
     </q-breadcrumbs>
 
     <q-card>
       <q-list separator>
-        <q-item
-          clickable
-          v-ripple
-          v-for="(item, index) in fatherFolder"
-          :key="index"
-          :active="
-            item.type === 'audio' && currentPlayingFile.hash === item.hash
-          "
-          active-class="text-white bg-teal"
-          @click="onClickItem(item)"
-          class="non-selectable"
-        >
+        <q-item clickable v-ripple v-for="(item, index) in fatherFolder" :key="index" :active="item.type === 'audio' && currentPlayingFile.hash === item.hash
+          " active-class="text-white bg-teal" @click="onClickItem(item)" class="non-selectable">
           <q-item-section avatar>
-            <q-icon
-              size="34px"
-              v-if="item.type === 'folder'"
-              color="amber"
-              name="folder"
-            />
-            <q-icon
-              size="34px"
-              v-else-if="item.type === 'text'"
-              color="info"
-              name="description"
-            />
-            <q-icon
-              size="34px"
-              v-else-if="item.type === 'image'"
-              color="orange"
-              name="photo"
-            />
-            <q-icon
-              size="34px"
-              v-else-if="item.type === 'other'"
-              color="info"
-              name="description"
-            />
-            <q-btn
-              v-else
-              round
-              dense
-              color="primary"
-              :icon="playIcon(item.hash)"
-              @click="onClickPlayButton(item.hash)"
-            />
+            <q-icon size="34px" v-if="item.type === 'folder'" color="amber" name="folder" />
+            <q-icon size="34px" v-else-if="item.type === 'text'" color="info" name="description" />
+            <q-icon size="34px" v-else-if="item.type === 'image'" color="orange" name="photo" />
+            <q-icon size="34px" v-else-if="item.type === 'other'" color="info" name="description" />
+            <q-btn v-else round dense color="primary" :icon="playIcon(item.hash)"
+              @click="onClickPlayButton(item.hash)" />
           </q-item-section>
 
           <q-item-section>
@@ -88,44 +31,25 @@
             }}</q-item-label>
 
             <!-- 音频文件时长 -->
-            <q-item-label
-              v-if="item.type === 'audio' && typeof item.duration === 'number'"
-              caption
-              lines="1"
-            >
+            <q-item-label v-if="item.type === 'audio' && typeof item.duration === 'number'" caption lines="1">
               <!-- <q-icon size="0.8rem" name="schedule" class="q-mr-xs" /> -->
               {{ formatSeconds(item.duration) }}
             </q-item-label>
           </q-item-section>
 
           <!-- 上下文菜单 -->
-          <q-menu
-            v-if="
-              item.type === 'audio' ||
-                item.type === 'text' ||
-                item.type === 'image' ||
-                item.type === 'other'
-            "
-            touch-position
-            context-menu
-            auto-close
-            transition-show="jump-down"
-            transition-hide="jump-up"
-          >
+          <q-menu v-if="
+            item.type === 'audio' ||
+            item.type === 'text' ||
+            item.type === 'image' ||
+            item.type === 'other'
+          " touch-position context-menu auto-close transition-show="jump-down" transition-hide="jump-up">
             <q-list separator>
-              <q-item
-                clickable
-                @click="addToQueue(item)"
-                v-if="item.type === 'audio'"
-              >
+              <q-item clickable @click="addToQueue(item)" v-if="item.type === 'audio'">
                 <q-item-section>添加到播放列表</q-item-section>
               </q-item>
 
-              <q-item
-                clickable
-                @click="playNext(item)"
-                v-if="item.type === 'audio'"
-              >
+              <q-item clickable @click="playNext(item)" v-if="item.type === 'audio'">
                 <q-item-section>下一曲播放</q-item-section>
               </q-item>
 
@@ -150,6 +74,7 @@
         </div>
       </q-card>
     </q-dialog>
+    <span class="flex flex-center text-grey">&nbsp;</span>
   </div>
 </template>
 
@@ -256,7 +181,11 @@ export default {
       const nextFileIndex = this.queue.findIndex(file => file.hash === hash);
       const nextFile = this.queue[nextFileIndex];
       const ext = this.getFileExt(nextFile.title);
-      console.log(this.currentPlayingFile.title, this.currentPlayingFile.hash, hash);
+      console.log(
+        this.currentPlayingFile.title,
+        this.currentPlayingFile.hash,
+        hash
+      );
       if (ext !== "mp4") {
         if (this.currentPlayingFile.hash === hash) {
           this.$store.commit("AudioPlayer/TOGGLE_PLAYING");
@@ -340,7 +269,7 @@ export default {
     },
 
     _unbindHandlerFull() {
-        console.log("播放结束");
+      console.log("播放结束");
     },
 
     formatSeconds(seconds) {
@@ -382,6 +311,7 @@ export default {
 .pull-handler:hover {
   background: rgba(150, 122, 116, 0.8);
 }
+
 .pull-handler:before {
   content: "";
   position: absolute;
@@ -391,18 +321,21 @@ export default {
   bottom: -10px;
   cursor: pointer;
 }
+
 .video-container {
   width: 100%;
   height: 100%;
   justify-content: center;
   align-items: center;
 }
+
 .video {
   width: 100%;
   height: calc(100vh - 100pt);
   object-fit: contain;
   background-color: black;
 }
+
 .image {
   width: 100%;
   height: calc(100vh - 100pt);
