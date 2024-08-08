@@ -373,7 +373,7 @@ export default {
 
 .video {
   width: 100%;
-  height: calc(100vh - 100pt);
+  max-height: calc(100vh - 100pt);
   object-fit: contain;
   background-color: black;
 }
