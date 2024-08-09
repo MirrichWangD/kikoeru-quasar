@@ -25,14 +25,8 @@
       <div v-show="metadata.title" class="row items-center">
         <!-- 评价 -->
         <div class="col-auto q-ml-sm">
-          <q-rating
-            v-model="rating"
-            size="sm"
-            :color="userMarked ? 'blue' : 'amber'"
-            icon="star_border"
-            icon-selected="star"
-            icon-half="star_half"
-          />
+          <q-rating v-model="rating" size="sm" :color="userMarked ? 'blue' : 'amber'" icon="star_border"
+            icon-selected="star" icon-half="star_half" />
 
           <!-- 评价分布明细 -->
           <q-tooltip content-class="text-subtitle1" v-if=metadata.rate_count_detail>
@@ -41,13 +35,8 @@
               <div class="col">{{ rate.review_point }}星</div>
 
               <!-- 评价占比 -->
-              <q-linear-progress
-                :value="rate.ratio/100"
-                color="amber"
-                track-color="white"
-                style="height: 15px; width: 100px"
-                class="col-auto"
-              />
+              <q-linear-progress :value="rate.ratio / 100" color="amber" track-color="white"
+                style="height: 15px; width: 100px" class="col-auto" />
 
               <div class="col q-mx-xs">({{ rate.count }})</div>
             </div>
@@ -74,7 +63,8 @@
         <!-- DLsite链接 -->
         <div class="col-auto q-ml-xs">
           <q-icon name="launch" size="xs" />
-          <a class="text-blue" :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`" rel="noreferrer noopener" target="_blank">DLsite</a>
+          <a class="text-blue" :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`"
+            rel="noreferrer noopener" target="_blank">DLsite</a>
         </div>
       </div>
 
@@ -82,16 +72,13 @@
       <div v-show="metadata.title">
         <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span>
         <span>售出数: {{ metadata.dl_count }}</span>
-        <q-chip v-if="!metadata.nsfw" dense square outline size="sm" class="q-py-sm text-green" style="margin-top: 0px;">全年龄</q-chip>
+        <q-chip v-if="!metadata.nsfw" dense square outline size="sm" class="q-py-sm text-green"
+          style="margin-top: 0px;">全年龄</q-chip>
       </div>
 
       <!-- 标签 -->
       <div class="q-ma-xs" v-if="showTags">
-        <router-link
-          v-for="(tag, index) in metadata.tags"
-          :to="`/works?tagId=${tag.id}`"
-          :key=index
-        >
+        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?tagId=${tag.id}`" :key=index>
           <q-chip size="md" class="shadow-2">
             {{ tag.name }}
           </q-chip>
@@ -100,11 +87,7 @@
 
       <!-- 声优 -->
       <div class="q-mx-xs q-my-sm">
-        <router-link
-          v-for="(va, index) in metadata.vas"
-          :to="`/works?vaId=${va.id}`"
-          :key=index
-        >
+        <router-link v-for="(va, index) in metadata.vas" :to="`/works?vaId=${va.id}`" :key=index>
           <q-chip square size="md" class="shadow-2" color="teal" text-color="white">
             {{ va.name }}
           </q-chip>
@@ -139,7 +122,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       rating: 0,
       userMarked: false,
@@ -148,7 +131,7 @@ export default {
   },
 
   computed: {
-    sortedRatings: function() {
+    sortedRatings: function () {
       function compare(a, b) {
         return (a.review_point > b.review_point) ? -1 : 1;
       }
@@ -174,7 +157,7 @@ export default {
   },
 
   watch: {
-    rating (newRating, oldRating) {
+    rating(newRating, oldRating) {
       if (oldRating) {
         const submitPayload = {
           'user_name': this.$store.state.User.name, // 用户名不会被后端使用
@@ -188,7 +171,7 @@ export default {
   },
 
   methods: {
-    submitRating (payload) {
+    submitRating(payload) {
       this.$axios.put('/api/review', payload)
         .then((response) => {
           this.showSuccNotif(response.data.message)

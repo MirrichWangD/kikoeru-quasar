@@ -53,7 +53,7 @@ export default {
 
   mixins: [NotifyMixin],
 
-  data () {
+  data() {
     return {
       config: {},
       loading: false,
@@ -63,7 +63,7 @@ export default {
   },
 
   methods: {
-    requestConfig () {
+    requestConfig() {
       this.$axios.get('/api/config/admin')
         .then((response) => {
           this.config = response.data.config;
@@ -83,7 +83,7 @@ export default {
         })
     },
 
-    onSubmit () {
+    onSubmit() {
       // String => Integer
       this.config.rewindSeekTime = parseInt(this.rewindSeekTime)
       this.config.forwardSeekTime = parseInt(this.forwardSeekTime)
@@ -108,7 +108,7 @@ export default {
     },
   },
 
-  created () {
+  created() {
     this.requestConfig()
   }
 }

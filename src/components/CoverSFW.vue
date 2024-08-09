@@ -1,25 +1,18 @@
 <template>
   <router-link :to="`/work/RJ${workid}`">
-    <q-img
-      :src="coverUrl"
-      :ratio="4/3"
-      :img-class="imgClass"
-      style="max-width: 560px;"
-      transition="fade"
-      @mouseover="toggleBlurFlag()"
-      @mouseout="toggleBlurFlag()"
-    >
+    <q-img :src="coverUrl" :ratio="4 / 3" :img-class="imgClass" style="max-width: 560px;" transition="fade"
+      @mouseover="toggleBlurFlag()" @mouseout="toggleBlurFlag()">
       <div class="absolute-top-left transparent" style="padding: 0;">
         <q-chip dense square color="brown" text-color="white" class="q-ma-sm">
-          {{`RJ${workid}`}}
+          {{ `RJ${workid}` }}
         </q-chip>
       </div>
 
       <div :v-if="release" class="absolute-bottom-right" style="padding: 5px;">
-        {{release}}
+        {{ release }}
       </div>
     </q-img>
-  </router-link>   
+  </router-link>
 </template>
 
 <script>
@@ -31,7 +24,7 @@ export default {
       type: String,
       required: true
     },
-    
+
     nsfw: {
       type: Boolean,
       default: true
@@ -42,20 +35,20 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
-      blurFlag: true,
+      blurFlag: true
     }
   },
 
   computed: {
-    coverUrl () {
+    coverUrl() {
       // 从 LocalStorage 中读取 token
       const token = this.$q.localStorage.getItem('jwt-token') || ''
       return this.workid ? `/api/cover/${this.workid}?token=${token}` : ""
     },
 
-    imgClass () {
+    imgClass() {
       if (this.$q.platform.is.mobile) {
         // 在移动设备上图片直接显示
         return ""
@@ -72,7 +65,7 @@ export default {
   },
 
   methods: {
-    toggleBlurFlag () {
+    toggleBlurFlag() {
       this.blurFlag = !this.blurFlag
     }
   }
@@ -80,7 +73,7 @@ export default {
 </script>
 
 <style lang="scss">
-  .blur-image {
-    filter: blur(10px);
-  }
+.blur-image {
+  filter: blur(10px);
+}
 </style>

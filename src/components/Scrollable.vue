@@ -3,7 +3,7 @@
     <div class="scrolling" :style="scrollStyle">
       <div ref="slot" class="one-line-expand">
         <slot name="default"></slot>
-        <span v-if="needScroll" class="spacer" :style="{'width': `${spacerWidth}px`}"></span>
+        <span v-if="needScroll" class="spacer" :style="{ 'width': `${spacerWidth}px` }"></span>
         <slot v-if="needScroll" name="default"></slot>
       </div>
     </div>
@@ -98,7 +98,7 @@ export default {
   }
 }
 </script>
-<style >
+<style>
 @keyframes scrollAnime {
   0% {
     transform: translateX(0);
@@ -107,10 +107,11 @@ export default {
   70% {
     transform: translateX(var(--max-scroll));
   }
+
   100% {
     transform: translateX(var(--max-scroll));
   }
-  
+
 }
 
 .container {

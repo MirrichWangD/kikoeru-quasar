@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-h5 text-weight-regular q-ma-md">
-      All {{restrict}}s
+      All {{ restrict }}s
     </div>
 
     <div class="row justify-center q-pb-xl q-pt-none">
@@ -15,7 +15,8 @@
 
         <div class="row justify-center q-gutter-sm">
           <div class="col-auto" v-for="item in (keyword ? filteredItems : items)" :key="item.id">
-            <q-btn no-caps rounded color="primary" :label="`${item.name} (${item.count})`" :to="`/works?${queryField}=${item.id}`" />
+            <q-btn no-caps rounded color="primary" :label="`${item.name} (${item.count})`"
+              :to="`/works?${queryField}=${item.id}`" />
           </div>
         </div>
       </div>
@@ -37,23 +38,23 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       items: [],
       keyword: ''
     }
   },
 
-  created () {
+  created() {
     this.requestList()
   },
 
   computed: {
-    url () {
+    url() {
       return `/api/${this.restrict}/`
     },
 
-    queryField () {
+    queryField() {
       switch (this.restrict) {
         case 'circles':
           return 'circleId'
@@ -66,19 +67,19 @@ export default {
       }
     },
 
-    filteredItems () {
+    filteredItems() {
       return this.items.filter(item => item.name.toLowerCase().indexOf(this.keyword.toLowerCase()) !== -1)
     }
   },
 
   watch: {
-    url () {
+    url() {
       this.requestList()
     }
   },
 
   methods: {
-    requestList () { 
+    requestList() {
       this.$axios.get(this.url)
         .then((response) => {
           this.items = response.data.concat()

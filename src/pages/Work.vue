@@ -23,7 +23,7 @@ export default {
     WorkTree
   },
 
-  data () {
+  data() {
     return {
       workid: this.$route.params.id,
       metadata: {
@@ -35,18 +35,18 @@ export default {
   },
 
   watch: {
-    $route (to) {
+    $route(to) {
       this.workid = to.params.id;
       this.requestData();
     }
   },
 
-  created () {
+  created() {
     this.requestData()
   },
 
   methods: {
-    requestData () {
+    requestData() {
       this.$axios.get(`/api/work/RJ${this.workid}`)
         .then(response => {
           this.metadata = response.data

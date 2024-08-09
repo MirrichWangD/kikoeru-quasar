@@ -83,7 +83,7 @@
               <div class="text-subtitle2">{{ preview_img_idx + 1 }}/{{ preview_img_list.length }}</div>
             </div>
             <div class="col-auto">
-              <q-btn outline @click="openFile(preview_img_list[preview_img_idx])" >全屏显示</q-btn>
+              <q-btn outline @click="openFile(preview_img_list[preview_img_idx])">全屏显示</q-btn>
             </div>
           </div>
         </q-card-section>

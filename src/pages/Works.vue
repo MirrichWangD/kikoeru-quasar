@@ -7,68 +7,32 @@
       </span>
     </div>
 
-    <div
-      :class="`row justify-center ${showMode === 'list' ? 'list' : 'q-mx-md'}`"
-    >
+    <div :class="`row justify-center ${showMode === 'list' ? 'list' : 'q-mx-md'}`">
       <q-infinite-scroll :offset="250" :disable="!stopLoad" class="col">
         <div class="row justify-between q-mb-md q-mx-sm">
           <!-- 排序选择框 -->
-          <q-select
-            dense
-            rounded
-            outlined
-            bg-color="white"
-            transition-show="scale"
-            transition-hide="scale"
-            v-model="sortOption"
-            :options="sortOptions"
-            label="排序"
-            class="col-auto"
-          />
+          <q-select dense rounded outlined bg-color="white" transition-show="scale" transition-hide="scale"
+            v-model="sortOption" :options="sortOptions" label="排序" class="col-auto" />
 
           <!-- 切换显示模式按钮 -->
-          <q-btn-toggle
-            dense
-            spread
-            rounded
-            v-model="showMode"
-            toggle-color="primary"
-            color="white"
-            text-color="primary"
-            :options="[
+          <q-btn-toggle dense spread rounded v-model="showMode" toggle-color="primary" color="white"
+            text-color="primary" :options="[
               { icon: 'view_module', value: 'miniCard' },
               { icon: 'view_column', value: 'card' },
               { icon: 'list', value: 'list' }
-            ]"
-            style="width: 85px;"
-            class="col-auto"
-          />
+            ]" style="width: 85px;" class="col-auto" />
 
         </div>
 
         <!-- 列表模式 -->
         <q-list v-if="showMode == 'list'" bordered separator class="shadow-2">
-          <WorkListItem
-            v-for="work in works"
-            :key="work.id"
-            :metadata="work"
-            :showLabel="$q.screen.width > 700"
-          />
+          <WorkListItem v-for="work in works" :key="work.id" :metadata="work" :showLabel="$q.screen.width > 700" />
         </q-list>
 
         <!-- 卡片模式 -->
         <div v-else class="row q-col-gutter-x-md q-col-gutter-y-lg">
-          <div
-            class="col-xs-12 col-sm-4 col-md-3"
-            :class="'col-lg-2 col-xl-2'"
-            v-for="work in works"
-            :key="work.id"
-          >
-            <WorkCard
-              :metadata="work"
-              :thumbnailMode="showMode == 'miniCard'"
-              class="fit"
-            />
+          <div class="col-xs-12 col-sm-4 col-md-3" :class="'col-lg-2 col-xl-2'" v-for="work in works" :key="work.id">
+            <WorkCard :metadata="work" :thumbnailMode="showMode == 'miniCard'" class="fit" />
           </div>
         </div>
 
@@ -83,13 +47,8 @@
 
     <!-- 分页按钮 -->
     <div class="row justify-center q-py-lg">
-      <Pagination
-        showQuickJumper
-        v-model="pagination.currentPage"
-        :defaultPageSize="pagination.pageSize"
-        :total="pagination.totalCount"
-        @change="onPageChange"
-      />
+      <Pagination showQuickJumper v-model="pagination.currentPage" :defaultPageSize="pagination.pageSize"
+        :total="pagination.totalCount" @change="onPageChange" />
     </div>
   </div>
 </template>
@@ -128,71 +87,19 @@ export default {
       // 排序标签按钮
       sortOption: { label: "最新收录", order: "add_time", sort: "desc" },
       sortOptions: [
-        {
-          label: "最新收录",
-          order: "add_time",
-          sort: "desc"
-        },
-        {
-          label: "发售日期倒序",
-          order: "release",
-          sort: "desc"
-        },
-        {
-          label: "我的评价排序",
-          order: "rating",
-          sort: "desc"
-        },
-        {
-          label: "发售日期顺序",
-          order: "release",
-          sort: "asc"
-        },
-        {
-          label: "售出数量倒序",
-          order: "dl_count",
-          sort: "desc"
-        },
-        {
-          label: "价格顺序",
-          order: "price",
-          sort: "asc"
-        },
-        {
-          label: "价格倒序",
-          order: "price",
-          sort: "desc"
-        },
-        {
-          label: "评价倒序",
-          order: "rate_average_2dp",
-          sort: "desc"
-        },
-        {
-          label: "评论数量倒序",
-          order: "review_count",
-          sort: "desc"
-        },
-        {
-          label: "RJ号倒序",
-          order: "id",
-          sort: "desc"
-        },
-        {
-          label: "RJ号顺序",
-          order: "id",
-          sort: "asc"
-        },
-        {
-          label: "全年龄顺序",
-          order: "nsfw",
-          sort: "asc"
-        },
-        {
-          label: "随机排序",
-          order: "random",
-          sort: "desc"
-        }
+        { label: "最新收录", order: "add_time", sort: "desc" },
+        { label: "发售日期倒序", order: "release", sort: "desc" },
+        { label: "我的评价排序", order: "rating", sort: "desc" },
+        { label: "发售日期顺序", order: "release", sort: "asc" },
+        { label: "售出数量倒序", order: "dl_count", sort: "desc" },
+        { label: "价格顺序", order: "price", sort: "asc" },
+        { label: "价格倒序", order: "price", sort: "desc" },
+        { label: "评价倒序", order: "rate_average_2dp", sort: "desc" },
+        { label: "评论数量倒序", order: "review_count", sort: "desc" },
+        { label: "RJ号倒序", order: "id", sort: "desc" },
+        { label: "RJ号顺序", order: "id", sort: "asc" },
+        { label: "全年龄顺序", order: "nsfw", sort: "asc" },
+        { label: "随机排序", order: "random", sort: "desc" }
       ]
     };
   },
@@ -288,10 +195,7 @@ export default {
           if (error.response) {
             // 请求已发出，但服务器响应的状态码不在 2xx 范围内
             if (error.response.status !== 401) {
-              this.showErrNotif(
-                error.response.data.error ||
-                  `${error.response.status} ${error.response.statusText}`
-              );
+              this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
             }
           } else {
             this.showErrNotif(error.message || error);
@@ -301,11 +205,7 @@ export default {
     },
 
     refreshPageTitle() {
-      if (
-        this.$route.query.circleId ||
-        this.$route.query.tagId ||
-        this.$route.query.vaId
-      ) {
+      if (this.$route.query.circleId || this.$route.query.tagId || this.$route.query.vaId) {
         let url = "",
           restrict = "";
         if (this.$route.query.circleId) {
@@ -319,8 +219,7 @@ export default {
           url = `/api/${restrict}/${this.$route.query.vaId}`;
         }
 
-        this.$axios
-          .get(url)
+        this.$axios.get(url)
           .then(response => {
             const name = response.data.name;
             let pageTitle;
@@ -339,15 +238,11 @@ export default {
             pageTitle += name || "";
 
             this.pageTitle = pageTitle;
-          })
-          .catch(error => {
+          }).catch(error => {
             if (error.response) {
               // 请求已发出，但服务器响应的状态码不在 2xx 范围内
               if (error.response.status !== 401) {
-                this.showErrNotif(
-                  error.response.data.error ||
-                    `${error.response.status} ${error.response.statusText}`
-                );
+                this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
               }
             } else {
               this.showErrNotif(error.message || error);
@@ -378,6 +273,7 @@ export default {
 
 <style lang="scss" scoped>
 .list {
+
   // 宽度 >= $breakpoint-sm-min
   @media (min-width: $breakpoint-sm-min) {
     padding: 0px 20px;
@@ -385,6 +281,7 @@ export default {
 }
 
 .work-card {
+
   // 宽度 > $breakpoint-xl-min
   @media (min-width: $breakpoint-md-min) {
     width: 560px;
