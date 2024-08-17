@@ -1,9 +1,9 @@
 {
   "name": "kikoeru-quasar",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "A self-hosted web media player for listening to your DLsite voice works.",
   "homepage": "https://github.com/kikoeru-project/kikoeru-quasar",
-  "productName": "Ubuntu-NAS",
+  "productName": "Kikoeru-NAS",
   "cordovaId": "org.cordova.quasar.kikoeru",
   "capacitorId": "",
   "author": "Watanuki-Kimihiro",
