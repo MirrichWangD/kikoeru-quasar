@@ -2,11 +2,7 @@
   <div>
     <div class="text-h5 text-weight-regular q-ma-md row">
       {{ pageTitle }}
-      <span v-show="pagination.totalCount">
-        &nbsp;({{ pagination.totalCount }})&nbsp;
-      </span>
       <div v-if="isAdvanceSearch"><!--高级搜索模式的多关键字展示-->
-        <span>By</span>
         <q-chip class="q-ma-xs" v-for="meta, index in advanceSearchKeywords" :key="meta.t + meta.d">
           {{ meta.d }}
           <q-btn class="q-ml-sm search-tag-close-btn" padding="xs" round flat size="xs" icon="close"
@@ -15,12 +11,16 @@
       </div>
       <div v-else> <!--普通搜索模式的信息展示-->
 
-        <span v-if="searchMetas.length !== 0">By</span>
+        <!-- <span v-if="searchMetas.length !== 0">By</span> -->
         <q-chip class="q-ma-xs" v-for="meta in searchMetas" :key="meta">
           {{ meta }}
           <q-btn class="q-ml-sm search-tag-close-btn" padding="xs" round flat size="xs" icon="close" to="/works" />
         </q-chip>
       </div>
+      
+      <span v-show="pagination.totalCount">
+        &nbsp;({{ pagination.totalCount }})&nbsp;
+      </span>
     </div>
 
     <!-- 搜索框 -->
@@ -301,10 +301,10 @@ export default {
             }
           });
       } else if (this.$route.query.keyword) {
-        this.pageTitle = `Search by `;
+        this.pageTitle = `Search By`;
         this.searchMetas = [this.$route.query.keyword];
       } else if (this.isAdvanceSearch) {
-        this.pageTitle = "Search works ";
+        this.pageTitle = "Search By";
       } else {
         this.pageTitle = "All works";
         this.searchMetas = [];
