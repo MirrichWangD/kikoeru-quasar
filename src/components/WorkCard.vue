@@ -57,7 +57,7 @@
         <!-- 作品时长 -->
         <div class="col-auto q-ml-xs">
           <q-icon name="schedule" size="xs" class="text-black" />
-          <span class="text-black">({{ formatSeconds(metadata.duration) }})</span>
+          <span class="text-grey">({{ formatSeconds(metadata.duration) }})</span>
         </div>
 
         <!-- DLsite链接 -->
