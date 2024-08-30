@@ -232,7 +232,6 @@ export default {
           });
         }
       } else {
-        this.$store.commit("AudioPlayer/EMPTY_QUEUE");
         this.openViewer(nextFile);
       }
     },
@@ -272,6 +271,7 @@ export default {
       if (file.type === "image") {
         this.openPreviewImg(file);
       } else {
+        this.$store.commit("AudioPlayer/EMPTY_QUEUE");
         this.$nextTick(() => {
           this.$refs.video.src = url
         })
