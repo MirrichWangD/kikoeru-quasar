@@ -3,14 +3,14 @@
     <div class="text-h5 text-weight-regular q-ma-md row">
       {{ pageTitle }}
       <div>
-        <!--普通搜索模式的信息展示-->
+        <!-- 搜索信息展示 -->
         <q-chip class="q-ma-xs" v-for="kw, index in keywords" :key="kw">
           {{ kw }}
           <q-btn class="q-ml-sm search-tag-close-btn" padding="xs" round flat size="xs" icon="close"
             @click="onRemoveSearchKeyword(index)" />
         </q-chip>
       </div>
-
+      <!-- 作品数量 -->
       <span v-show="totalCount">
         &nbsp;({{ totalCount }})&nbsp;
       </span>
@@ -119,12 +119,16 @@ export default {
   },
 
   created() {
-    this.refreshPageTitle();
     this.seed = Math.floor(Math.random() * 100);
     this.reset();
   },
 
   mounted() {
+    if (this.$route.query.keyword) {
+      for (let kw of this.$route.query.keyword.split(" ")) {
+        this.keywords.push(kw);
+      }
+    }
     if (localStorage.sortOption) {
       this.sortOption = JSON.parse(localStorage.sortOption);
     }
@@ -165,7 +169,7 @@ export default {
       handler: function (keywords) {
         this.keywords = [];
         if (keywords) {
-          for (let kw of keywords.split("&")) {
+          for (let kw of keywords.split(" ")) {
             this.keywords.push(kw);
           }
         }
@@ -194,7 +198,7 @@ export default {
       };
 
       if (this.$route.query.keyword) {
-        params.keywords = this.$route.query.keyword.split("&");
+        params.keywords = this.$route.query.keyword.split(" ");
       }
 
       return this.$axios.get(this.url, { params })
@@ -219,6 +223,7 @@ export default {
     },
 
     refreshPageTitle() {
+      this.totalCount = 0;
       if (this.$route.query.keyword) {
         this.pageTitle = `Search By`;
       } else {
@@ -234,17 +239,13 @@ export default {
       this.requestWorksQueue().then(() => { this.stopLoad = false });
     },
 
-    onWorkCardTouch(id) {
-      this.touchedWorkId = id;
-    },
-
     // 搜索功能
     onRemoveSearchKeyword(index) {
       this.keywords.splice(index, 1);
       if (this.keywords.length) {
         this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } });
       } else {
-        this.$router.push("");
+        this.$router.push("/");
       }
     },
   }

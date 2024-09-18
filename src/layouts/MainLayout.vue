@@ -3,15 +3,15 @@
     <q-header class="shadow-4">
       <q-toolbar class="row justify-between">
         <q-btn flat dense round @click="drawerOpen = !drawerOpen" icon="menu" aria-label="Menu" />
-
+        <!-- 左侧-返回按钮 -->
         <q-btn flat size="md" icon="arrow_back_ios" @click="back()" v-if="isNotAtHomePage" />
-        <!-- 左侧"Kikoeru"文字 -->
+        <!-- 左侧-"Kikoeru"文字 -->
         <q-toolbar-title class="gt-xs">
           <router-link :to="'/'" class="text-white">
             Kikoeru
           </router-link>
         </q-toolbar-title>
-        <!-- 右侧搜索栏 -->
+        <!-- 右侧-搜索栏 -->
         <q-input dark dense standout v-model="editKeyword" @keyup.enter="onAddSearchKeyword" input-class="text-left"
           class="q-mr-sm">
           <template v-slot:prepend>
@@ -192,10 +192,8 @@ export default {
       handler: function (keywords) {
         this.keywords = [];
         if (keywords) {
-          for (let kw of keywords.split("&")) {
-            if (!this.keywords.includes(kw)) {
+          for (let kw of keywords.split(" ")) {
               this.keywords.push(kw);
-            }
           }
         }
       },
@@ -203,6 +201,7 @@ export default {
   },
 
   mounted() {
+    this.initKeyword();
     this.initUser();
     this.checkUpdate();
     this.readSharedConfig();
@@ -225,6 +224,16 @@ export default {
       "SET_REWIND_SEEK_TIME",
       "SET_FORWARD_SEEK_TIME"
     ]),
+    initKeyword() {
+      if (this.$route.query.keyword) {
+        for (let kw of this.$route.query.keyword.split(" ")) {
+          if (!this.keywords.includes(kw)) {
+            this.keywords.push(kw);
+          }
+        }
+      }
+    },
+
     initUser() {
       this.$axios.get("/api/auth/me")
         .then(res => {
@@ -355,13 +364,13 @@ export default {
       }
       this.keywords.push(keyword);
       this.editKeyword = "";
-      this.$router.push({ "name": "works", query: { keyword: this.keywords.join("&") } })
+      this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } })
     },
 
     onRemoveSearchKeyword(index) {
       this.keywords.splice(index, 1);
       if (this.keywords.length) {
-        this.$router.push({ "name": "works", query: { keyword: this.keywords.join("&") } })
+        this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } })
       } else {
         this.$router.push("/");
       }
