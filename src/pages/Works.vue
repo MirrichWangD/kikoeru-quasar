@@ -2,37 +2,21 @@
   <div>
     <div class="text-h5 text-weight-regular q-ma-md row">
       {{ pageTitle }}
-      <div v-if="isAdvanceSearch"><!--高级搜索模式的多关键字展示-->
-        <q-chip class="q-ma-xs" v-for="meta, index in advanceSearchKeywords" :key="meta.t + meta.d">
-          {{ meta.d }}
+      <div>
+        <!--普通搜索模式的信息展示-->
+        <q-chip class="q-ma-xs" v-for="kw, index in keywords" :key="kw">
+          {{ kw }}
           <q-btn class="q-ml-sm search-tag-close-btn" padding="xs" round flat size="xs" icon="close"
-            @click="removeAdvanceSearchKeyword(index)" />
+            @click="onRemoveSearchKeyword(index)" />
         </q-chip>
       </div>
-      <div v-else> <!--普通搜索模式的信息展示-->
 
-        <!-- <span v-if="searchMetas.length !== 0">By</span> -->
-        <q-chip class="q-ma-xs" v-for="meta in searchMetas" :key="meta">
-          {{ meta }}
-          <q-btn class="q-ml-sm search-tag-close-btn" padding="xs" round flat size="xs" icon="close" to="/works" />
-        </q-chip>
-      </div>
-      
-      <span v-show="pagination.totalCount">
-        &nbsp;({{ pagination.totalCount }})&nbsp;
+      <span v-show="totalCount">
+        &nbsp;({{ totalCount }})&nbsp;
       </span>
     </div>
 
-    <!-- 搜索框 -->
-    <div v-if="isAdvanceSearch" class="q-pa-md q-full-width">
-      <q-input outlined autofocus label="关键字搜索" :hint="advanceSearchBarHint" v-model="editKeyword"
-        @keyup.enter="onAddAdvanceSearchKeyword">
-        <template v-slot:append>
-          <q-btn round dense flat icon="add" @click="onAddAdvanceSearchKeyword" />
-        </template>
-      </q-input>
-    </div>
-
+    <!-- 主界面 -->
     <div :class="`row justify-center ${showMode === 'list' ? 'list' : 'q-mx-md'}`">
       <q-infinite-scroll :offset="250" :disable="!stopLoad" class="col">
         <div class="row justify-between q-mb-md q-mx-sm">
@@ -42,11 +26,7 @@
 
           <!-- 切换显示模式按钮 -->
           <q-btn-toggle dense spread rounded v-model="showMode" toggle-color="primary" color="white"
-            text-color="primary" :options="[
-              { icon: 'view_module', value: 'miniCard' },
-              { icon: 'view_column', value: 'card' },
-              { icon: 'list', value: 'list' }
-            ]" style="width: 85px;" class="col-auto" />
+            text-color="primary" :options="showOptions" style="width: 85px;" class="col-auto" />
 
         </div>
 
@@ -62,7 +42,7 @@
           </div>
         </div>
 
-        <!-- 加载三点动画 -->
+        <!-- 加载动画 -->
         <template v-slot:loading>
           <div class="row justify-center q-my-md">
             <q-spinner-dots color="primary" size="40px" />
@@ -73,8 +53,8 @@
 
     <!-- 分页按钮 -->
     <div class="row justify-center q-py-lg">
-      <Pagination showQuickJumper v-model="pagination.currentPage" :defaultPageSize="pagination.pageSize"
-        :total="pagination.totalCount" @change="onPageChange" />
+      <Pagination showQuickJumper v-model="page" :total="totalCount" :defaultPageSize="pageSize"
+        @change="onPageChange" />
     </div>
   </div>
 </template>
@@ -84,14 +64,6 @@ import WorkCard from "components/WorkCard";
 import WorkListItem from "components/WorkListItem";
 import NotifyMixin from "../mixins/Notification.js";
 import { Pagination } from "ant-design-vue";
-
-const AdvanceSearchCondType = {
-  UNKNOWN: 0,
-  FUZZY: 1, // 全文模糊搜索，包括标题，
-  VA: 2,
-  TAG: 3,
-  CIRCLE: 4,
-};
 
 export default {
   name: "Works",
@@ -111,7 +83,9 @@ export default {
       works: [],
       pageTitle: "",
       // 分页参数
-      pagination: { currentPage: 0, pageSize: 12, totalCount: 0 },
+      page: 1,
+      totalCount: 0,
+      pageSize: 12,
       seed: 7, // random sort
 
       // 排序标签按钮
@@ -132,130 +106,104 @@ export default {
         { label: "随机排序", order: "random", sort: "desc" }
       ],
 
-      // 聚合高级搜索
-      searchMetas: [],
-      editKeyword: "",
-      advanceSearchKeywords: [],
-      isAdvanceSearch: false
+      // 显示模式按钮
+      showOptions: [
+        { icon: 'view_module', value: 'miniCard' },
+        { icon: 'view_column', value: 'card' },
+        { icon: 'list', value: 'list' }
+      ],
+
+      // 搜索
+      keywords: [],
     };
   },
 
   created() {
     this.refreshPageTitle();
     this.seed = Math.floor(Math.random() * 100);
+    this.reset();
   },
 
   mounted() {
     if (localStorage.sortOption) {
-      try {
-        this.sortOption = JSON.parse(localStorage.sortOption);
-      } catch {
-        localStorage.removeItem("sortOption");
-      }
+      this.sortOption = JSON.parse(localStorage.sortOption);
     }
-    if (localStorage.advanceSearchKeywords) {
-      this.advanceSearchKeywords = JSON.parse(localStorage.advanceSearchKeywords || "[]");
-    }
-    this.checkAdvanceSearchMode();
   },
 
   computed: {
     url() {
       const query = this.$route.query;
-      if (query.circleId) {
-        return `/api/circles/${this.$route.query.circleId}/works`;
-      } else if (query.tagId) {
-        return `/api/tags/${this.$route.query.tagId}/works`;
-      } else if (query.vaId) {
-        return `/api/vas/${this.$route.query.vaId}/works`;
-      } else if (query.keyword || this.isAdvanceSearch) {
+      if (query.keyword) {
         return `/api/search/`;
       } else {
         return "/api/works";
       }
-    },
-    advanceSearchBarHint() {
-      if (this.editKeyword === "") return "模糊关键字，可搜索作品名、声优名、标签名、社团名"
-      else return "按回车或者右侧加号添加"
-    },
-  },
-
-  // keep-alive hooks
-  // <keep-alive /> is set in MainLayout
-  activated() {
-    this.stopLoad = false;
-  },
-
-  deactivated() {
-    this.stopLoad = true;
+    }
   },
 
   watch: {
-    url() {
-      this.reset();
-    },
-
     sortOption(newSortOptionSetting) {
-      localStorage.sortOption = JSON.stringify(newSortOptionSetting);
+      const newSortOptionSettingObject = JSON.stringify(newSortOptionSetting);
       this.seed = Math.floor(Math.random() * 100);
-      this.reset();
+      if (localStorage.sortOption !== newSortOptionSettingObject) {
+        localStorage.sortOption = newSortOptionSettingObject
+        this.reset();
+      }
     },
 
     showMode(newShowModeSetting) {
       localStorage.showMode = newShowModeSetting;
     },
 
-    advanceSearchKeywords(newValue) {
-      localStorage.advanceSearchKeywords = JSON.stringify(newValue, null, 0);
-      this.reset()
+    "$route"(to, from) {
+      if (!to.query.page & to.name === "works" & !from.path.includes("/work/")) {
+        this.reset();
+      }
     },
 
-    "$route.name": {
-      handler: function () {
-        this.checkAdvanceSearchMode()
+    "$route.query.keyword": {
+      handler: function (keywords) {
+        this.keywords = [];
+        if (keywords) {
+          for (let kw of keywords.split("&")) {
+            this.keywords.push(kw);
+          }
+        }
       },
-      deep: true,
-      immediate: true
-    },
-
-    "$route.query.keyword"() {
-      this.reset();
+      immediate: true,
     }
   },
 
   methods: {
-    onLoad(index, done) {
-      this.requestWorksQueue().then(() => done());
-    },
-
     onPageChange(page) {
+      this.$router.push({ query: { ...this.$route.query, page: page } })
       this.stopLoad = true;
-      this.pagination.currentPage = page;
-      this.works = [];
       this.requestWorksQueue().then(() => {
         this.stopLoad = false;
       });
     },
 
     requestWorksQueue() {
+      console.log(`requestWorksQueue seed: ${this.seed}`)
+      this.works = [];
       const params = {
         order: this.sortOption.order,
         sort: this.sortOption.sort,
-        page: this.pagination.currentPage || 1,
+        page: this.$route.query.page || 1,
         seed: this.seed,
-        isAdvance: this.isAdvanceSearch ? 1 : 0
       };
-      if (this.isAdvanceSearch) {
-        params.keyword = JSON.stringify(this.advanceSearchKeywords, null, 0);
-      } else if (this.$route.query.keyword) {
-        params.keyword = this.$route.query.keyword;
+
+      if (this.$route.query.keyword) {
+        params.keywords = this.$route.query.keyword.split("&");
       }
 
       return this.$axios.get(this.url, { params })
         .then(response => {
           const works = response.data.works;
           this.works = works.concat();
-          this.pagination = response.data.pagination;
+          this.page = response.data.page;
+          this.totalCount = response.data.totalCount;
+          this.pageSize = response.data.pageSize;
         })
         .catch(error => {
           if (error.response) {
@@ -271,51 +219,18 @@ export default {
     },
 
     refreshPageTitle() {
-      if (this.$route.query.circleId || this.$route.query.tagId || this.$route.query.vaId) {
-        let url = "", restrict = "";
-        if (this.$route.query.circleId) {
-          restrict = "circles";
-          url = `/api/${restrict}/${this.$route.query.circleId}`;
-        } else if (this.$route.query.tagId) {
-          restrict = "tags";
-          url = `/api/${restrict}/${this.$route.query.tagId}`;
-        } else {
-          restrict = "vas";
-          url = `/api/${restrict}/${this.$route.query.vaId}`;
-        }
-
-        this.$axios.get(url)
-          .then(response => {
-            const name = response.data.name;
-            // pageTitle += name || "";
-            this.searchMetas = [name];
-            this.pageTitle = "Search works";
-          }).catch(error => {
-            if (error.response) {
-              // 请求已发出，但服务器响应的状态码不在 2xx 范围内
-              if (error.response.status !== 401) {
-                this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
-              }
-            } else {
-              this.showErrNotif(error.message || error);
-            }
-          });
-      } else if (this.$route.query.keyword) {
+      if (this.$route.query.keyword) {
         this.pageTitle = `Search By`;
-        this.searchMetas = [this.$route.query.keyword];
-      } else if (this.isAdvanceSearch) {
-        this.pageTitle = "Search By";
       } else {
         this.pageTitle = "All works";
-        this.searchMetas = [];
       }
     },
 
     reset() {
       this.seed = Math.floor(Math.random() * 100);
       this.stopLoad = true;
+      this.keywords = [];
       this.refreshPageTitle();
-      this.pagination = { currentPage: 0, pageSize: 12, totalCount: 0 };
       this.requestWorksQueue().then(() => { this.stopLoad = false });
     },
 
@@ -323,35 +238,15 @@ export default {
       this.touchedWorkId = id;
     },
 
-    checkAdvanceSearchMode() {
-      this.isAdvanceSearch = this.$route.name == "advance search";
-    },
-
-    onAddAdvanceSearchKeyword() {
-      const keyword = this.editKeyword.trim()
-      if (keyword === "") {
-        this.showErrNotif("无法添加空白的关键字");
-        return;
+    // 搜索功能
+    onRemoveSearchKeyword(index) {
+      this.keywords.splice(index, 1);
+      if (this.keywords.length) {
+        this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } });
+      } else {
+        this.$router.push("");
       }
-
-      for (let kw of this.advanceSearchKeywords) {
-        if (kw.t == AdvanceSearchCondType.FUZZY && kw.d == keyword) {
-          this.showErrNotif("关键字重复，添加失败");
-          return;
-        }
-      }
-
-      this.advanceSearchKeywords.push({
-        t: AdvanceSearchCondType.FUZZY,
-        d: keyword,
-      });
-      this.editKeyword = "";
-      this.reset();
     },
-
-    removeAdvanceSearchKeyword(index) {
-      this.advanceSearchKeywords.splice(index, 1);
-    }
   }
 };
 </script>

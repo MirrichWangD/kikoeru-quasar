@@ -62,11 +62,6 @@ const routes = [
         component: Work
       },
       {
-        path: "search",
-        name: "advance search",
-        component: Works,
-      },
-      {
         path: 'circles',
         props: { restrict: "circles" },
         component: List

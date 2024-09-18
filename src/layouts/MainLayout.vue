@@ -5,29 +5,25 @@
         <q-btn flat dense round @click="drawerOpen = !drawerOpen" icon="menu" aria-label="Menu" />
 
         <q-btn flat size="md" icon="arrow_back_ios" @click="back()" v-if="isNotAtHomePage" />
-
+        <!-- 左侧"Kikoeru"文字 -->
         <q-toolbar-title class="gt-xs">
           <router-link :to="'/'" class="text-white">
             Kikoeru
           </router-link>
         </q-toolbar-title>
-
-        <!-- <q-input dark dense rounded standout v-model="keyword" debounce="500" input-class="text-right" class="q-mr-sm">
-          <template v-slot:append>
-            <q-icon v-if="keyword === ''" name="search" />
-            <q-icon v-else name="clear" class="cursor-pointer" @click="keyword = ''" />
-          </template>
-</q-input> -->
-        <q-input v-if="$route.name !== 'advance search'" dark dense rounded standout v-model="keyword" debounce="500"
-          input-class="text-right" class="q-mr-sm">
-          <template v-slot:before>
-            <q-btn round dense flat icon="manage_search" to="/search">
-              <q-tooltip>点此进入聚合搜索，支持多关键字搜索</q-tooltip>
-            </q-btn>
+        <!-- 右侧搜索栏 -->
+        <q-input dark dense standout v-model="editKeyword" @keyup.enter="onAddSearchKeyword" input-class="text-left"
+          class="q-mr-sm">
+          <template v-slot:prepend>
+            <q-chip class="q-ma-xs" v-for="meta, index in keywords" :key="meta">
+              {{ meta }}
+              <q-btn class="q-ml-sm search-tag-close-btn" padding="xs" round flat size="xs" icon="close"
+                @click="onRemoveSearchKeyword(index)" />
+            </q-chip>
           </template>
           <template v-slot:append>
-            <q-icon v-if="keyword === ''" name="search" />
-            <q-icon v-else name="clear" class="cursor-pointer" @click="keyword = ''" />
+            <q-icon v-if="keywords.length === 0" name="search" />
+            <q-icon v-else name="clear" class="cursor-pointer" @click="onRemoveAllSearchKeyword()" />
           </template>
         </q-input>
 
@@ -165,7 +161,8 @@ export default {
 
   data() {
     return {
-      keyword: "",
+      editKeyword: "",
+      keywords: [],
       drawerOpen: false,
       miniState: true,
       confirm: false,
@@ -183,16 +180,25 @@ export default {
   },
 
   watch: {
-    keyword() {
-      this.$router.push(this.keyword ? `/works?keyword=${this.keyword}` : `/works`);
-    },
-
     randId() {
       this.$router.push(`/work/RJ${this.randId}`);
     },
     sharedConfig(config) {
       this.SET_REWIND_SEEK_TIME(config.rewindSeekTime);
       this.SET_FORWARD_SEEK_TIME(config.forwardSeekTime);
+    },
+
+    "$route.query.keyword": {
+      handler: function (keywords) {
+        this.keywords = [];
+        if (keywords) {
+          for (let kw of keywords.split("&")) {
+            if (!this.keywords.includes(kw)) {
+              this.keywords.push(kw);
+            }
+          }
+        }
+      },
     }
   },
 
@@ -332,6 +338,38 @@ export default {
             this.showErrNotif(error.message || error);
           }
         });
+    },
+    // 搜索功能
+    onAddSearchKeyword() {
+      const keyword = this.editKeyword.trim();
+      if (keyword === "") {
+        this.showErrNotif("无法添加空白的关键字");
+        return;
+      }
+
+      for (let kw of this.keywords) {
+        if (kw === keyword) {
+          this.showErrNotif("关键字重复，添加失败");
+          return;
+        }
+      }
+      this.keywords.push(keyword);
+      this.editKeyword = "";
+      this.$router.push({ "name": "works", query: { keyword: this.keywords.join("&") } })
+    },
+
+    onRemoveSearchKeyword(index) {
+      this.keywords.splice(index, 1);
+      if (this.keywords.length) {
+        this.$router.push({ "name": "works", query: { keyword: this.keywords.join("&") } })
+      } else {
+        this.$router.push("/");
+      }
+    },
+
+    onRemoveAllSearchKeyword() {
+      this.keywords = [];
+      this.$router.push("/");
     },
 
     logout() {
