@@ -50,7 +50,7 @@
 
     <!-- 分页按钮 -->
     <div class="row justify-center q-py-lg">
-      <Pagination showQuickJumper :current="page" :total="totalCount" :PageSize="pageSize" @change="onPageChange" />
+      <Pagination showQuickJumper :current="page" :total="totalCount" :pageSize="pageSize" @change="onPageChange" />
     </div>
   </div>
 </template>
