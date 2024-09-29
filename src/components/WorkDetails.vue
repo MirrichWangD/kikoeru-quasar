@@ -15,7 +15,7 @@
 
         <!-- 社团名 -->
         <div class="text-subtitle1 text-weight-regular">
-          <router-link :to="`/works?circleId=${metadata.circle.id}`" class="text-grey">
+          <router-link :to="`/works?keyword=${metadata.circle.name}`" class="text-grey">
             {{ metadata.circle.name }}
           </router-link>
         </div>
@@ -75,7 +75,7 @@
 
       <!-- 标签 -->
       <div class="q-px-none q-py-sm" v-if="showTags">
-        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?tagId=${tag.id}`" :key=index>
+        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key=index>
           <q-chip size="md" class="shadow-4">
             {{ tag.name }}
           </q-chip>
@@ -84,7 +84,7 @@
 
       <!-- 声优 -->
       <div class="q-px-none q-pt-sm q-py-sm">
-        <router-link v-for="(va, index) in metadata.vas" :to="`/works?vaId=${va.id}`" :key=index>
+        <router-link v-for="(va, index) in metadata.vas" :to="`/works?keyword=${va.name}`" :key=index>
           <q-chip square size="md" class="shadow-4" color="teal" text-color="white">
             {{ va.name }}
           </q-chip>

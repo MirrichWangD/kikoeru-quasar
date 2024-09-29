@@ -19,7 +19,7 @@
     <!-- 主界面 -->
     <div :class="`row justify-center ${showMode === 'list' ? 'list' : 'q-mx-md'}`">
       <q-infinite-scroll :offset="250" :disable="!stopLoad" class="col">
-        <div class="row justify-between q-mb-md q-mx-sm">
+        <div class="row justify-between q-mb-md q-mr-sm">
           <!-- 排序选择框 -->
           <q-select dense rounded outlined bg-color="white" transition-show="scale" transition-hide="scale"
             v-model="sortOption" :options="sortOptions" label="排序" class="col-auto" />
@@ -27,7 +27,11 @@
           <!-- 切换显示模式按钮 -->
           <q-btn-toggle dense spread rounded v-model="showMode" toggle-color="primary" color="white"
             text-color="primary" :options="showOptions" style="width: 85px;" class="col-auto" />
+        </div>
 
+        <div v-if="stopLoad" class="row justify-center q-mb-md q-mr-sm">
+          <!-- 加载动画 -->
+          <q-spinner-dots color="primary" size="40px" />
         </div>
 
         <!-- 列表模式 -->
@@ -41,20 +45,12 @@
             <WorkCard :metadata="work" :thumbnailMode="showMode == 'miniCard'" class="fit" />
           </div>
         </div>
-
-        <!-- 加载动画 -->
-        <template v-slot:loading>
-          <div class="row justify-center q-my-md">
-            <q-spinner-dots color="primary" size="40px" />
-          </div>
-        </template>
       </q-infinite-scroll>
     </div>
 
     <!-- 分页按钮 -->
     <div class="row justify-center q-py-lg">
-      <Pagination showQuickJumper v-model="page" :total="totalCount" :defaultPageSize="pageSize"
-        @change="onPageChange" />
+      <Pagination showQuickJumper :current="page" :total="totalCount" :PageSize="pageSize" @change="onPageChange" />
     </div>
   </div>
 </template>
@@ -119,16 +115,10 @@ export default {
   },
 
   created() {
-    this.seed = Math.floor(Math.random() * 100);
     this.reset();
   },
 
   mounted() {
-    if (this.$route.query.keyword) {
-      for (let kw of this.$route.query.keyword.split(" ")) {
-        this.keywords.push(kw);
-      }
-    }
     if (localStorage.sortOption) {
       this.sortOption = JSON.parse(localStorage.sortOption);
     }
@@ -147,10 +137,8 @@ export default {
 
   watch: {
     sortOption(newSortOptionSetting) {
-      const newSortOptionSettingObject = JSON.stringify(newSortOptionSetting);
-      this.seed = Math.floor(Math.random() * 100);
-      if (localStorage.sortOption !== newSortOptionSettingObject) {
-        localStorage.sortOption = newSortOptionSettingObject
+      if (localStorage.sortOption !== JSON.stringify(this.sortOption)) {
+        localStorage.sortOption = JSON.stringify(newSortOptionSetting)
         this.reset();
       }
     },
@@ -159,10 +147,34 @@ export default {
       localStorage.showMode = newShowModeSetting;
     },
 
-    "$route"(to, from) {
-      if (!to.query.page & to.name === "works" & !from.path.includes("/work/")) {
-        this.reset();
+    "$route"(to) {
+      // console.log("BeforeLocalStorage", localStorage)
+      // console.log("to", to);
+      // console.log("from", from);
+      // 处理分页
+      // 假如跳转至`/work/RJxxx`或`/`则为NaN
+      const page = parseInt(this.$route.query.page);
+      // 处理关键字
+      const queryKeywords = this.$route.query.keyword;
+      this.keywords = [];
+      if (this.$route.query.keyword) {
+        for (let kw of queryKeywords.split(" ")) {
+          this.keywords.push(kw);
+        }
       }
+      // url处page为空或者keywords为空时，跳转到所有作品的第一页
+      // console.log("this", this.$route);
+      if (
+        to.name === "works" &
+        ((this.$route.fullPath == "/works" & this.page !== 1) || this.keywords.join(",") !== localStorage.keywords)
+      ) {
+        localStorage.keywords = this.keywords;
+        this.page = page ? page : 1;
+        this.stopLoad = true;
+        this.refreshPageTitle();
+        this.requestWorksQueue().then(() => { this.stopLoad = false; })
+      }
+      // console.log("afterLocalStorage", localStorage);
     },
 
     "$route.query.keyword": {
@@ -174,22 +186,22 @@ export default {
           }
         }
       },
-      immediate: true,
+      immediate: true
     }
   },
 
   methods: {
     onPageChange(page) {
+      console.log(`change page to: ${page}`);
       this.$router.push({ query: { ...this.$route.query, page: page } })
       this.stopLoad = true;
-      this.requestWorksQueue().then(() => {
-        this.stopLoad = false;
-      });
+      this.requestWorksQueue().then(() => { this.stopLoad = false; });
     },
 
     requestWorksQueue() {
       console.log(`requestWorksQueue seed: ${this.seed}`)
       this.works = [];
+      this.totalCount = 0;
       const params = {
         order: this.sortOption.order,
         sort: this.sortOption.sort,
@@ -234,7 +246,6 @@ export default {
     reset() {
       this.seed = Math.floor(Math.random() * 100);
       this.stopLoad = true;
-      this.keywords = [];
       this.refreshPageTitle();
       this.requestWorksQueue().then(() => { this.stopLoad = false });
     },
@@ -242,11 +253,8 @@ export default {
     // 搜索功能
     onRemoveSearchKeyword(index) {
       this.keywords.splice(index, 1);
-      if (this.keywords.length) {
-        this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } });
-      } else {
-        this.$router.push("/");
-      }
+      const query = this.keywords.length ? { keyword: this.keywords.join(" ") } : {};
+      this.$router.push({ "name": "works", query: query })
     },
   }
 };
