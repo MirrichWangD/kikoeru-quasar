@@ -21,7 +21,7 @@ jobs:
           node-version: '14'
 
       - name: Install dependencies
-        run: npm install -g @quasar/cli && npm ci
+        run: npm install -g @quasar/cli@2.0.1 && npm ci
 
       # Note: we don't have any unit tests yet
       # Only ESLint is available, which is integrated into quasar.conf.js
