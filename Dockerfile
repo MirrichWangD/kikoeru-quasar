@@ -13,7 +13,7 @@ WORKDIR /frontend
 # So I prebuilt the binaries for arm64 and armv7
 # @quasar/app v2 no longer uses this deprecated package, so this line will be removed in the future
 ENV SASS_BINARY_SITE="https://github.com/umonaca/node-sass/releases/download"
-RUN npm install -g @quasar/cli
+RUN npm install -g @quasar/cli@2.0.0
 COPY package*.json ./
 RUN npm ci
 COPY . .
