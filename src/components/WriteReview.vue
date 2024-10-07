@@ -84,7 +84,7 @@ export default {
 
   props: {
     workid: {
-      type: Number,
+      type: String,
       required: true
     },
     metadata: {

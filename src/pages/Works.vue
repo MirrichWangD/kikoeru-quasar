@@ -50,7 +50,7 @@
 
     <!-- 分页按钮 -->
     <div class="row justify-center q-py-lg">
-      <Pagination showQuickJumper :current="page" :total="totalCount" :pageSize="pageSize" @change="onPageChange" />
+      <a-pagination showQuickJumper :current="page" :total="totalCount" :pageSize="pageSize" @change="onPageChange" />
     </div>
   </div>
 </template>
@@ -59,7 +59,6 @@
 import WorkCard from "components/WorkCard";
 import WorkListItem from "components/WorkListItem";
 import NotifyMixin from "../mixins/Notification.js";
-import { Pagination } from "ant-design-vue";
 
 export default {
   name: "Works",
@@ -68,8 +67,7 @@ export default {
 
   components: {
     WorkCard,
-    WorkListItem,
-    Pagination
+    WorkListItem
   },
 
   data() {

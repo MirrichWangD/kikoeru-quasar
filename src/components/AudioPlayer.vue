@@ -48,12 +48,14 @@
         <q-btn flat dense size="lg" :icon="swapSeekButton ? rewindIcon : 'skip_previous'"
           @click="swapSeekButton ? rewind(true) : previousTrack()" style="width: 55px" class="col-auto" />
         <!-- 后退x秒 -->
-        <q-btn flat dense size="lg" :icon="rewindIcon" @click="rewind(true)" style="width: 55px;" class="col-auto" />
+        <q-btn flat dense size="lg" :icon="!swapSeekButton ? rewindIcon : 'skip_previous'" @click="rewind(true)"
+          style="width: 55px;" class="col-auto" />
         <!-- 暂停/播放 -->
         <q-btn flat dense size="30px" :icon="playingIcon" @click="togglePlaying()" style="width: 60px"
           class="col-auto" />
         <!-- 前进x秒 -->
-        <q-btn flat dense size="lg" :icon="forwardIcon" @click="forward(true)" style="width: 55px" class="col-auto" />
+        <q-btn flat dense size="lg" :icon="!swapSeekButton ? forwardIcon : 'skip_next'" @click="forward(true)"
+          style="width: 55px" class="col-auto" />
         <!-- 下一曲目 -->
         <q-btn flat dense size="lg" :icon="swapSeekButton ? forwardIcon : 'skip_next'"
           @click="swapSeekButton ? forward(true) : nextTrack()" style="width: 55px" class="col-auto" />
@@ -63,7 +65,7 @@
       <!-- HTML5 volume in iOS is read-only -->
       <div class="row items-center q-mx-lg q-pt-sm">
         <q-icon name="volume_down" size="sm" class="col-auto" />
-        <Slider v-model="volume" :disabled="$q.platform.is.ios" :min="0" :max="1" :step="0.01" class="col q-mx-md" />
+        <a-slider v-model="volume" :disabled="$q.platform.is.ios" :min="0" :max="1" :step="0.01" class="col q-mx-md" />
         <q-icon name="volume_up" size="sm" class="col-auto" />
       </div>
 
@@ -71,34 +73,22 @@
       <div class="row self-center">
         <!-- 当前播放列表 -->
         <q-btn flat dense size="md" padding="none sm" icon="queue_music"
-          @click="showCurrentPlayList = !showCurrentPlayList" class="q-ma-sm" />
-        <!-- 播放模式 -->
-        <q-btn flat dense size="md" padding="none sm" :icon="playModeIcon" @click="changePlayMode()" class="q-ma-sm" />
-        <!-- 打开作品详情 -->
-        <q-btn flat dense size="md" padding="none sm" icon="link" @click="openWorkDetail()" class="q-ma-sm" />
-
-        <!-- 更多功能 -->
-        <q-btn flat dense size="md" padding="none sm" icon="more_horiz" class="q-ma-sm">
-          <q-menu>
-            <q-item clickable v-ripple @click="swapSeekButton = !swapSeekButton">
-              <q-item-section avatar>
-                <q-icon name="switch" />
-              </q-item-section>
-              <q-item-section>
-                交换进度与切换按钮
-              </q-item-section>
-            </q-item>
-
-            <q-item clickable v-ripple @click="openWorkDetail()" v-close-popup>
-              <q-item-section avatar>
-                <q-icon name="link" />
-              </q-item-section>
-              <q-item-section>
-                打开作品详情
-              </q-item-section>
-            </q-item>
-          </q-menu>
+          @click="showCurrentPlayList = !showCurrentPlayList" class="q-ma-sm">
+          <q-tooltip>打开当前播放列表</q-tooltip>
         </q-btn>
+        <!-- 播放模式 -->
+        <q-btn flat dense size="md" padding="none sm" :icon="playModeIcon" @click="changePlayMode()" class="q-ma-sm">
+          <q-tooltip>播放模式: {{ this.playModeName() }}</q-tooltip>
+        </q-btn>
+        <!-- 打开作品详情 -->
+        <q-btn flat dense size="md" padding="none sm" icon="link" @click="openWorkDetail()" class="q-ma-sm">
+          <q-tooltip>打开作品详情</q-tooltip>
+        </q-btn>
+        <!-- 播放器设置 -->
+        <q-btn flat dense size="md" padding="none sm" icon="tune" @click="openPlayerSettings()" class="q-ma-sm">
+          <q-tooltip>打开播放器设置</q-tooltip>
+        </q-btn>
+
       </div>
     </q-card>
 
@@ -148,6 +138,60 @@
         </q-list>
       </q-card>
     </q-dialog>
+
+    <!-- 播放器设置 -->
+    <q-dialog v-model="showPlayerSettings">
+      <q-card class="player-settings q-py-sm justify-center">
+        <q-toolbar>
+          <q-toolbar-title>播放器设置</q-toolbar-title>
+        </q-toolbar>
+        <q-list bordered separator>
+          <!-- 倒带跳跃秒数设置 -->
+          <q-item>
+            <q-item-section avatar>
+              <q-icon size="md" name="fast_rewind" />
+            </q-item-section>
+            <q-item-section main>
+              <q-item-label>倒带跳跃秒数</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-select borderless v-model="rewindSeekTimeModel" :options="seekTimeOptions"
+                @input="setRewindSeekTime" />
+            </q-item-section>
+          </q-item>
+          <!-- 前进跳跃秒数设置 -->
+          <q-item>
+            <q-item-section avatar>
+              <q-icon flat dense size="md" name="fast_forward" />
+            </q-item-section>
+            <q-item-section main>
+              <q-item-label>前进跳跃秒数</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-select borderless v-model="forwardSeekTimeModel" :options="seekTimeOptions"
+                @input="setForwardSeekTime" />
+            </q-item-section>
+          </q-item>
+          <!-- 交换进度与切换按钮 -->
+          <q-item>
+            <q-item-section avatar>
+              <q-icon flat dense size="md" name="swap_horiz" />
+            </q-item-section>
+            <q-item-section main>
+              <q-item-label>交换进度与切换按钮</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-toggle v-model="swapSeekButton" @change="swapSeekButton = !swapSeekButton" />
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-btn label="关闭" @click="hidePlayerSettings" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -156,16 +200,17 @@ import draggable from "vuedraggable";
 import AudioElement from "components/AudioElement";
 import Scrollable from "components/Scrollable";
 import { mapState, mapGetters, mapMutations } from "vuex";
-import { Slider } from "ant-design-vue";
+import NotifyMixin from '../mixins/Notification.js'
 
 export default {
   name: "AudioPlayer",
+
+  mixins: [NotifyMixin],
 
   components: {
     draggable,
     AudioElement,
     Scrollable,
-    Slider
   },
 
   data() {
@@ -174,7 +219,15 @@ export default {
       editCurrentPlayList: false,
       queueCopy: [],
       hideSeekButton: false,
-      swapSeekButton: false
+      swapSeekButton: false,
+      showPlayerSettings: false,
+      rewindSeekTimeModel: { label: "5 秒", value: 5 },
+      forwardSeekTimeModel: { label: "30 秒", value: 30 },
+      seekTimeOptions: [
+        { label: "5 秒", value: 5 },
+        { label: "10 秒", value: 10 },
+        { label: "30 秒", value: 30 }
+      ]
     };
   },
 
@@ -311,14 +364,16 @@ export default {
       changePlayMode: "CHANGE_PLAY_MODE",
       setVolume: "SET_VOLUME",
       rewind: "SET_REWIND_SEEK_MODE",
-      forward: "SET_FORWARD_SEEK_MODE"
+      forward: "SET_FORWARD_SEEK_MODE",
     }),
     ...mapMutations("AudioPlayer", [
       "SET_TRACK",
       "SET_QUEUE",
       "REMOVE_FROM_QUEUE",
       "EMPTY_QUEUE",
-      "SET_VOLUME"
+      "SET_VOLUME",
+      "SET_REWIND_SEEK_TIME",
+      "SET_FORWARD_SEEK_TIME"
     ]),
 
     formatSeconds(seconds) {
@@ -388,6 +443,19 @@ export default {
       this.EMPTY_QUEUE();
     },
 
+    playModeName() {
+      switch(this.playMode.name) {
+        case "order":
+          return "顺序播放";
+        case "all repeat":
+          return "列表循环";
+        case "repeat once":
+          return "单曲循环";
+        case "shuffle":
+          return "随机播放";
+      }
+    },
+
     openWorkDetail() {
       if (this.workDetailUrl && this.$route.path !== this.workDetailUrl) {
         this.$router.push(this.workDetailUrl);
@@ -395,13 +463,101 @@ export default {
       if (this.$q.screen.lt.sm) {
         this.toggleHide();
       }
+    },
+
+    openPlayerSettings() {
+      this.showPlayerSettings = true;
+    },
+
+    hidePlayerSettings() {
+      this.showPlayerSettings = false;
+    },
+
+    setRewindSeekTime(newRewindSeekTime) {
+      this.rewindSeekTimeModel = newRewindSeekTime;
+      this.SET_REWIND_SEEK_TIME(newRewindSeekTime.value);
+      this.saveConfigSeekTime(newRewindSeekTime.value, 0);
+    },
+
+    setForwardSeekTime(newForwardSeekTime) {
+      this.newForwardSeekTime = newForwardSeekTime;
+      this.SET_FORWARD_SEEK_TIME(newForwardSeekTime.value);
+      this.saveConfigSeekTime(0, newForwardSeekTime.value);
+    },
+
+    requestConfigSeekTime() {
+      this.$axios.get('/api/config/admin')
+        .then((response) => {
+          this.config = response.data.config;
+
+          this.rewindSeekTimeModel = { label: `${this.config.rewindSeekTime} 秒`, value: this.config.rewindSeekTime };
+          this.forwardSeekTimeModel = { label: `${this.config.forwardSeekTime} 秒`, value: this.config.forwardSeekTime };
+        })
+        .catch((error) => {
+          if (error.response) {
+            // 请求已发出，但服务器响应的状态码不在 2xx 范围内
+            if (error.response.status !== 401) {
+              this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
+            }
+          } else {
+            this.showErrNotif(error.message || error)
+          }
+        })
+    },
+
+    saveConfigSeekTime(rewindSeekTime = 0, forwardSeekTime = 0) {
+      this.config.rewindSeekTime = rewindSeekTime !== 0 ? rewindSeekTime : this.config.rewindSeekTime;
+      this.config.forwardSeekTime = forwardSeekTime !== 0 ? forwardSeekTime : this.config.forwardSeekTime;
+
+      this.loading = true
+      this.$axios.put("/api/config/admin", {
+        config: this.config
+      }).then((response) => {
+        this.loading = false;
+        console.log(`change audio player seek time: ${response.data.message}`)
+      }).catch((error) => {
+        this.loading = false
+        if (error.response) {
+          // 请求已发出，但服务器响应的状态码不在 2xx 范围内
+          this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
+        } else {
+          this.showErrNotif(error.message || error)
+        }
+      })
     }
+
+  },
+  created() {
+    this.requestConfigSeekTime();
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .audio-player {
+
+  // 宽度 > $breakpoint-sm-min
+  @media (min-width: $breakpoint-sm-min) {
+    width: 330px;
+    margin: 0px 10px 10px 0px;
+    // border-radius: 8px;
+  }
+
+  // 宽度 < $breakpoint-xs-max (599px)
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  transition: 0.6s;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.player-settings {
 
   // 宽度 > $breakpoint-sm-min
   @media (min-width: $breakpoint-sm-min) {
@@ -497,5 +653,28 @@ export default {
   top: -10px;
   bottom: -10px;
   cursor: pointer;
+}
+</style>
+<style>
+.ant-slider .ant-slider-rail {
+  background-color: rgba(193, 201, 209, 0.66) !important;
+}
+
+.ant-slider .ant-slider-track {
+  background-color: #57b5fa !important;
+}
+
+.ant-slider-handle {
+  border: 1px solid rgba(166, 160, 165, 0.9) !important;
+}
+
+
+/* 这里覆盖 a-slider 的悬停样式 */
+.ant-slider:hover .ant-slider-rail {
+  background-color: rgba(193, 201, 209, 0.66) !important;
+}
+
+.ant-slider-handle:focus {
+  box-shadow: none !important;
 }
 </style>
