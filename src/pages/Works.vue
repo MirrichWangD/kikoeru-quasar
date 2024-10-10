@@ -120,6 +120,14 @@ export default {
   },
 
 
+  created() {
+    if (this.$q.localStorage.has("pageSize")) {
+      this.pageSize = this.$q.localStorage.getItem("pageSize");
+    }
+    this.reset();
+  },
+
+
   mounted() {
     if (this.$q.localStorage.has("pageSize")) {
       this.pageSize = this.$q.localStorage.getItem("pageSize");
@@ -142,8 +150,11 @@ export default {
 
   watch: {
     sortOption(newSortOptionSetting) {
-      this.$q.localStorage.set("sortOption", newSortOptionSetting);
-      this.reset();
+      const localSortOption = this.$q.localStorage.getItem("sortOption");
+      if (localSortOption.order !== newSortOptionSetting.order & localSortOption.sort !== newSortOptionSetting.sort) {
+        this.$q.localStorage.set("sortOption", newSortOptionSetting);
+        this.reset();
+      }
     },
 
     showMode(newShowModeSetting) {

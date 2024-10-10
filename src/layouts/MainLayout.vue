@@ -372,13 +372,13 @@ export default {
     // 深色功能
     toggleDarkMode() {
       const darkMode = this.getDarkMode()
-      console.log("toggleDarkMode called")
-      if (darkMode === false) {
-        this.$q.dark.set(true);
-      } else if (darkMode === true) {
-        this.$q.dark.set('auto')
+      console.log("toggleDarkMode called", darkMode)
+      if (darkMode === true) {
+        this.$q.dark.set("auto");
+      } else if (darkMode == "auto") {
+        this.$q.dark.set(false)
       } else {
-        this.$q.dark.set(false);
+        this.$q.dark.set(true);
       }
       this.$q.localStorage.set("darkMode", this.$q.dark.mode);
     },
