@@ -5,7 +5,6 @@
           <q-time
             v-model="time"
             now-btn
-            :dark="sleepMode"
           />
         </div>
 

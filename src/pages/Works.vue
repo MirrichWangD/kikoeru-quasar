@@ -18,18 +18,22 @@
 
     <!-- 主界面 -->
     <div :class="`row justify-center ${showMode === 'list' ? 'list' : 'q-mx-md'}`">
-      <q-infinite-scroll :offset="250" :disable="!stopLoad" class="col">
+      <q-infinite-scroll :offset="250" :disable="true" class="col">
         <div class="row justify-between q-mb-md q-mr-sm">
           <!-- 排序选择框 -->
-          <q-select dense rounded outlined bg-color="white" transition-show="scale" transition-hide="scale"
-            v-model="sortOption" :options="sortOptions" label="排序" class="col-auto" />
+          <q-select dense rounded outlined transition-show="scale" transition-hide="scale" v-model="sortOption"
+            :options="sortOptions" label="排序" class="col-auto" :bg-color="$q.dark.isActive ? 'black' : 'white'" />
+
+          <!-- 是否包含字幕 -->
+          <q-toggle v-model="lyricStatus" label="是否包含字幕" @input="onLyricStatusChange"></q-toggle>
 
           <!-- 切换显示模式按钮 -->
-          <q-btn-toggle dense spread rounded v-model="showMode" toggle-color="primary" color="white"
-            text-color="primary" :options="showOptions" style="width: 85px;" class="col-auto" />
+          <q-btn-toggle dense spread rounded v-model="showMode" toggle-color="primary" text-color="primary"
+            :options="showOptions" style="width: 85px;" class="col-auto"
+            :class="$q.dark.isActive ? 'bg-black' : 'bg-white'" />
         </div>
 
-        <div v-if="stopLoad" class="row justify-center q-mb-md q-mr-sm">
+        <div v-if="!stopLoad" class="row justify-center q-mb-md q-mr-sm">
           <!-- 加载动画 -->
           <q-spinner-dots color="primary" size="40px" />
         </div>
@@ -50,7 +54,8 @@
 
     <!-- 分页按钮 -->
     <div class="row justify-center q-py-lg">
-      <a-pagination showQuickJumper :current="page" :total="totalCount" :pageSize="pageSize" @change="onPageChange" />
+      <a-pagination showQuickJumper :current="page" :total="totalCount" :pageSize="pageSize" @change="onPageChange"
+        :class="{ 'dark': $q.dark.isActive }" />
     </div>
   </div>
 </template>
@@ -99,6 +104,8 @@ export default {
         { label: "全年龄顺序", order: "nsfw", sort: "asc" },
         { label: "随机排序", order: "random", sort: "desc" }
       ],
+      // 是否包含字幕
+      lyricStatus: false,
 
       // 显示模式按钮
       showOptions: [
@@ -112,13 +119,13 @@ export default {
     };
   },
 
-  created() {
-    this.reset();
-  },
 
   mounted() {
-    if (localStorage.sortOption) {
-      this.sortOption = JSON.parse(localStorage.sortOption);
+    if (this.$q.localStorage.has("pageSize")) {
+      this.pageSize = this.$q.localStorage.getItem("pageSize");
+    }
+    if (this.$q.localStorage.has("sortOption")) {
+      this.sortOption = this.$q.localStorage.getItem("sortOption");
     }
   },
 
@@ -135,10 +142,8 @@ export default {
 
   watch: {
     sortOption(newSortOptionSetting) {
-      if (localStorage.sortOption !== JSON.stringify(this.sortOption)) {
-        localStorage.sortOption = JSON.stringify(newSortOptionSetting)
-        this.reset();
-      }
+      this.$q.localStorage.set("sortOption", newSortOptionSetting);
+      this.reset();
     },
 
     showMode(newShowModeSetting) {
@@ -146,54 +151,47 @@ export default {
     },
 
     "$route"(to) {
-      // console.log("BeforeLocalStorage", localStorage)
-      // console.log("to", to);
-      // console.log("from", from);
-      // 处理分页
-      // 假如跳转至`/work/RJxxx`或`/`则为NaN
-      const page = parseInt(this.$route.query.page);
+      // 处理分页，假如跳转至`/work/RJxxx`或`/`则为NaN
+      const queryPage = parseInt(this.$route.query.page);
       // 处理关键字
-      const queryKeywords = this.$route.query.keyword;
-      this.keywords = [];
-      if (this.$route.query.keyword) {
-        for (let kw of queryKeywords.split(" ")) {
-          this.keywords.push(kw);
+      this.keywords = this.$route.query.keyword ? this.$route.query.keyword.split(" ") : [];
+      // 前往/works路由
+      if (to.name === "works") {
+        // 其他页面单击"kikoeru"返回主页时重新请求数据，在第一页单击不需要重新请求数据
+        if ((isNaN(queryPage) & this.page !== 1) || localStorage.keywords !== this.keywords.join(" ")) {
+          localStorage.keywords = this.keywords;
+          this.reset();
         }
       }
-      // url处page为空或者keywords为空时，跳转到所有作品的第一页
-      // console.log("this", this.$route);
-      if (
-        to.name === "works" &
-        ((this.$route.fullPath == "/works" & this.page !== 1) || this.keywords.join(",") !== localStorage.keywords)
-      ) {
-        localStorage.keywords = this.keywords;
-        this.page = page ? page : 1;
-        this.stopLoad = true;
-        this.refreshPageTitle();
-        this.requestWorksQueue().then(() => { this.stopLoad = false; })
-      }
-      // console.log("afterLocalStorage", localStorage);
     },
 
     "$route.query.keyword": {
       handler: function (keywords) {
-        this.keywords = [];
-        if (keywords) {
-          for (let kw of keywords.split(" ")) {
-            this.keywords.push(kw);
-          }
-        }
+        if (keywords) console.log(`search by keywords: [${keywords}]`);
+        this.keywords = keywords ? keywords.split(" ") : [];
       },
       immediate: true
     }
   },
 
   methods: {
+    onLyricStatusChange(newLyricStatus) {
+      console.log("switch lyric status:", newLyricStatus);
+      this.lyricStatus = newLyricStatus;
+      const query = { ...this.$route.query, page: 1 };
+      if (Object.keys(query).length !== Object.keys(this.$route.query).length || this.$route.query.page !== 1) {
+        this.$router.push({ query: query }).catch(err => {
+          console.error(err);
+        });
+      }
+      this.reset();
+    },
+
     onPageChange(page) {
       console.log(`change page to: ${page}`);
       this.$router.push({ query: { ...this.$route.query, page: page } })
-      this.stopLoad = true;
-      this.requestWorksQueue().then(() => { this.stopLoad = false; });
+      this.page = page;
+      this.reset();
     },
 
     requestWorksQueue() {
@@ -204,6 +202,8 @@ export default {
         order: this.sortOption.order,
         sort: this.sortOption.sort,
         page: this.$route.query.page || 1,
+        pageSize: this.pageSize,
+        lyricStatus: this.lyricStatus,
         seed: this.seed,
       };
 
@@ -243,9 +243,8 @@ export default {
 
     reset() {
       this.seed = Math.floor(Math.random() * 100);
-      this.stopLoad = true;
       this.refreshPageTitle();
-      this.requestWorksQueue().then(() => { this.stopLoad = false });
+      this.requestWorksQueue().then(() => { this.stopLoad = true });
     },
 
     // 搜索功能
@@ -259,6 +258,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark.ant-pagination {
+  filter: invert(100%) hue-rotate(180deg);
+}
+
 .list {
 
   // 宽度 >= $breakpoint-sm-min

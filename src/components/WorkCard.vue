@@ -9,7 +9,7 @@
     <div v-if="!thumbnailMode">
       <!-- 标题 -->
       <div class="q-mx-sm text-h6 text-weight-regular ellipsis-2-lines">
-        <router-link :to="`/work/RJ${metadata.id}`" class="text-black">
+        <router-link :to="`/work/RJ${metadata.id}`" style="color: inherit;">
           {{ metadata.title }}
         </router-link>
       </div>
@@ -56,7 +56,7 @@
 
         <!-- 作品时长 -->
         <div class="col-auto q-ml-xs">
-          <q-icon name="schedule" size="xs" class="text-black" />
+          <q-icon name="schedule" size="xs" />
           <span class="text-grey">({{ formatSeconds(metadata.duration) }})</span>
         </div>
 
@@ -74,12 +74,14 @@
         <span>售出数: {{ metadata.dl_count }}</span>
         <q-chip v-if="!metadata.nsfw" dense square outline size="sm" class="q-py-sm text-green"
           style="margin-top: 0px;">全年龄</q-chip>
+        <q-chip v-if="metadata.lyric_status" dense square outline size="sm" class="q-py-sm text-blue"
+          style="margin-top: 0px;">带字幕</q-chip>
       </div>
 
       <!-- 标签 -->
       <div class="q-ma-xs" v-if="showTags">
         <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key=index>
-          <q-chip size="md" class="shadow-2">
+          <q-chip size="md" class="shadow-2" :class="{ 'bg-grey-9': $q.dark.isActive }">
             {{ tag.name }}
           </q-chip>
         </router-link>

@@ -1,8 +1,8 @@
 <template>
   <div>
     <!-- 播放器 -->
-    <q-card class="fixed-bottom-right audio-player q-pa-sm text-black" @mousewheel.prevent @touchmove.prevent
-      color="primary" :class="{ showStyle: showAudioPlayer, hideStyle: !showAudioPlayer }"
+    <q-card class="fixed-bottom-right audio-player q-pa-sm" @mousewheel.prevent @touchmove.prevent color="primary"
+      :class="{ showStyle: showAudioPlayer, hideStyle: !showAudioPlayer, 'text-black': !$q.dark.isActive }"
       :style="{ '--cover-url': `url(${coverUrl})` }">
       <!-- 顶部小横条 -->
       <div class="pull-handler" @click="toggleHide" v-touch-swipe.mouse.down="toggleHide"></div>
@@ -45,20 +45,17 @@
       <!-- 播放按钮 -->
       <div class="row flex-center">
         <!-- 上一曲目 -->
-        <q-btn flat dense size="lg" :icon="swapSeekButton ? rewindIcon : 'skip_previous'"
-          @click="swapSeekButton ? rewind(true) : previousTrack()" style="width: 55px" class="col-auto" />
+        <q-btn flat dense size="lg" icon="skip_previous" @click="previousTrack()" style="width: 55px"
+          class="col-auto" />
         <!-- 后退x秒 -->
-        <q-btn flat dense size="lg" :icon="!swapSeekButton ? rewindIcon : 'skip_previous'" @click="rewind(true)"
-          style="width: 55px;" class="col-auto" />
+        <q-btn flat dense size="lg" :icon="rewindIcon" @click="rewind(true)" style="width: 55px;" class="col-auto" />
         <!-- 暂停/播放 -->
         <q-btn flat dense size="30px" :icon="playingIcon" @click="togglePlaying()" style="width: 60px"
           class="col-auto" />
         <!-- 前进x秒 -->
-        <q-btn flat dense size="lg" :icon="!swapSeekButton ? forwardIcon : 'skip_next'" @click="forward(true)"
-          style="width: 55px" class="col-auto" />
+        <q-btn flat dense size="lg" :icon="forwardIcon" @click="forward(true)" style="width: 55px" class="col-auto" />
         <!-- 下一曲目 -->
-        <q-btn flat dense size="lg" :icon="swapSeekButton ? forwardIcon : 'skip_next'"
-          @click="swapSeekButton ? forward(true) : nextTrack()" style="width: 55px" class="col-auto" />
+        <q-btn flat dense size="lg" icon="skip_next" @click="nextTrack()" style="width: 55px" class="col-auto" />
       </div>
 
       <!-- 音量控件 -->
@@ -83,10 +80,6 @@
         <!-- 打开作品详情 -->
         <q-btn flat dense size="md" padding="none sm" icon="link" @click="openWorkDetail()" class="q-ma-sm">
           <q-tooltip>打开作品详情</q-tooltip>
-        </q-btn>
-        <!-- 播放器设置 -->
-        <q-btn flat dense size="md" padding="none sm" icon="tune" @click="openPlayerSettings()" class="q-ma-sm">
-          <q-tooltip>打开播放器设置</q-tooltip>
         </q-btn>
 
       </div>
@@ -138,60 +131,6 @@
         </q-list>
       </q-card>
     </q-dialog>
-
-    <!-- 播放器设置 -->
-    <q-dialog v-model="showPlayerSettings">
-      <q-card class="player-settings q-py-sm justify-center">
-        <q-toolbar>
-          <q-toolbar-title>播放器设置</q-toolbar-title>
-        </q-toolbar>
-        <q-list bordered separator>
-          <!-- 倒带跳跃秒数设置 -->
-          <q-item>
-            <q-item-section avatar>
-              <q-icon size="md" name="fast_rewind" />
-            </q-item-section>
-            <q-item-section main>
-              <q-item-label>倒带跳跃秒数</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-select borderless v-model="rewindSeekTimeModel" :options="seekTimeOptions"
-                @input="setRewindSeekTime" />
-            </q-item-section>
-          </q-item>
-          <!-- 前进跳跃秒数设置 -->
-          <q-item>
-            <q-item-section avatar>
-              <q-icon flat dense size="md" name="fast_forward" />
-            </q-item-section>
-            <q-item-section main>
-              <q-item-label>前进跳跃秒数</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-select borderless v-model="forwardSeekTimeModel" :options="seekTimeOptions"
-                @input="setForwardSeekTime" />
-            </q-item-section>
-          </q-item>
-          <!-- 交换进度与切换按钮 -->
-          <q-item>
-            <q-item-section avatar>
-              <q-icon flat dense size="md" name="swap_horiz" />
-            </q-item-section>
-            <q-item-section main>
-              <q-item-label>交换进度与切换按钮</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-toggle v-model="swapSeekButton" @change="swapSeekButton = !swapSeekButton" />
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <q-btn label="关闭" @click="hidePlayerSettings" />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 
@@ -217,26 +156,16 @@ export default {
     return {
       showCurrentPlayList: false,
       editCurrentPlayList: false,
-      queueCopy: [],
-      hideSeekButton: false,
-      swapSeekButton: false,
-      showPlayerSettings: false,
-      rewindSeekTimeModel: { label: "5 秒", value: 5 },
-      forwardSeekTimeModel: { label: "30 秒", value: 30 },
-      seekTimeOptions: [
-        { label: "5 秒", value: 5 },
-        { label: "10 秒", value: 10 },
-        { label: "30 秒", value: 30 }
-      ]
+      queueCopy: []
     };
   },
 
   mounted() {
-    if (this.$q.localStorage.has("hideSeekButton")) {
-      this.hideSeekButton = this.$q.localStorage.getItem("hideSeekButton");
+    if (localStorage.getItem("rewindSeekTime")) {
+      this.SET_REWIND_SEEK_TIME(this.$q.localStorage.getItem("rewindSeekTime"));
     }
-    if (this.$q.localStorage.has("swapSeekButton")) {
-      this.swapSeekButton = this.$q.localStorage.getItem("swapSeekButton");
+    if (localStorage.getItem("forwardSeekTime")) {
+      this.SET_FORWARD_SEEK_TIME(this.$q.localStorage.getItem("forwardSeekTime"));
     }
   },
 
@@ -255,14 +184,6 @@ export default {
         this.editCurrentPlayList = false;
       }
     },
-
-    hideSeekButton(option) {
-      this.$q.localStorage.set("hideSeekButton", option);
-    },
-
-    swapSeekButton(option) {
-      this.$q.localStorage.set("swapSeekButton", option);
-    }
   },
 
   computed: {
@@ -366,6 +287,7 @@ export default {
       rewind: "SET_REWIND_SEEK_MODE",
       forward: "SET_FORWARD_SEEK_MODE",
     }),
+  
     ...mapMutations("AudioPlayer", [
       "SET_TRACK",
       "SET_QUEUE",
@@ -444,7 +366,7 @@ export default {
     },
 
     playModeName() {
-      switch(this.playMode.name) {
+      switch (this.playMode.name) {
         case "order":
           return "顺序播放";
         case "all repeat":
@@ -472,63 +394,6 @@ export default {
     hidePlayerSettings() {
       this.showPlayerSettings = false;
     },
-
-    setRewindSeekTime(newRewindSeekTime) {
-      this.rewindSeekTimeModel = newRewindSeekTime;
-      this.SET_REWIND_SEEK_TIME(newRewindSeekTime.value);
-      this.saveConfigSeekTime(newRewindSeekTime.value, 0);
-    },
-
-    setForwardSeekTime(newForwardSeekTime) {
-      this.newForwardSeekTime = newForwardSeekTime;
-      this.SET_FORWARD_SEEK_TIME(newForwardSeekTime.value);
-      this.saveConfigSeekTime(0, newForwardSeekTime.value);
-    },
-
-    requestConfigSeekTime() {
-      this.$axios.get('/api/config/admin')
-        .then((response) => {
-          this.config = response.data.config;
-
-          this.rewindSeekTimeModel = { label: `${this.config.rewindSeekTime} 秒`, value: this.config.rewindSeekTime };
-          this.forwardSeekTimeModel = { label: `${this.config.forwardSeekTime} 秒`, value: this.config.forwardSeekTime };
-        })
-        .catch((error) => {
-          if (error.response) {
-            // 请求已发出，但服务器响应的状态码不在 2xx 范围内
-            if (error.response.status !== 401) {
-              this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
-            }
-          } else {
-            this.showErrNotif(error.message || error)
-          }
-        })
-    },
-
-    saveConfigSeekTime(rewindSeekTime = 0, forwardSeekTime = 0) {
-      this.config.rewindSeekTime = rewindSeekTime !== 0 ? rewindSeekTime : this.config.rewindSeekTime;
-      this.config.forwardSeekTime = forwardSeekTime !== 0 ? forwardSeekTime : this.config.forwardSeekTime;
-
-      this.loading = true
-      this.$axios.put("/api/config/admin", {
-        config: this.config
-      }).then((response) => {
-        this.loading = false;
-        console.log(`change audio player seek time: ${response.data.message}`)
-      }).catch((error) => {
-        this.loading = false
-        if (error.response) {
-          // 请求已发出，但服务器响应的状态码不在 2xx 范围内
-          this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
-        } else {
-          this.showErrNotif(error.message || error)
-        }
-      })
-    }
-
-  },
-  created() {
-    this.requestConfigSeekTime();
   }
 };
 </script>

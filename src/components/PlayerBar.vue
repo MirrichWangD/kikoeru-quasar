@@ -1,20 +1,24 @@
 <template>
-  <q-slide-transition class="bordered elevated">
-    <div v-show="currentPlayingFile.hash && hide" class="row bg-white text-black">
+  <q-slide-transition class="bordered elevated" v-show="currentPlayingFile.hash && hide">
+    <div v-show="currentPlayingFile.hash && hide" class="row"
+      :class="$q.dark.isActive ? 'bg-grey-9 ':'bg-white text-black'">
       <q-item clickable v-ripple @click="toggleHide()" style="padding: 0px 5px;" class="col non-selectable">
         <q-item-section avatar>
           <q-img transition="fade" :src="samCoverUrl" style="height: 50px; width: 50px" class="rounded-borders" />
         </q-item-section>
-        
+
         <q-item-section>
           <q-item-label lines="2">{{ currentPlayingFile.title }}</q-item-label>
           <q-item-label caption lines="1">{{ currentPlayingFile.workTitle }}</q-item-label>
         </q-item-section>
       </q-item>
 
-      <q-btn flat size="lg" icon="skip_previous" @click="previousTrack()" style="height: 60px; width: 60px" class="col-auto gt-sm"/>
-      <q-btn flat size="lg" :icon="playingIcon" @click="togglePlaying()" style="height: 60px; width: 60px" class="col-auto" />
-      <q-btn flat size="lg" icon="skip_next" @click="nextTrack()" style="height: 60px; width: 60px" class="col-auto gt-sm"/>
+      <q-btn flat size="lg" icon="skip_previous" @click="previousTrack()" style="height: 60px; width: 60px"
+        class="col-auto gt-sm" />
+      <q-btn flat size="lg" :icon="playingIcon" @click="togglePlaying()" style="height: 60px; width: 60px"
+        class="col-auto" />
+      <q-btn flat size="lg" icon="skip_next" @click="nextTrack()" style="height: 60px; width: 60px"
+        class="col-auto gt-sm" />
     </div>
   </q-slide-transition>
 </template>

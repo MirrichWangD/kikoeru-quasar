@@ -2,62 +2,40 @@
   <q-page padding>
     <div class="fit row wrap justify-between items-start q-px-sm">
       <div class="col-lg-3 col-sm-12 col-xs-12">
-          <q-btn-toggle
-            v-model="mode"
-            @input="changeMode"
-            spread
-            no-caps
-            rounded
-            toggle-color="primary"
-            color="white"
-            class="text-bold"
-            text-color="black"
-            :options="[
-              {label: '我的评价', value: 'review'},
-              {label: '我的进度', value: 'progress'},
-              {label: '分类整理', value: 'folder'}
-            ]"
-          />
+        <q-btn-toggle v-model="mode" @input="changeMode" spread no-caps rounded toggle-color="primary" class="text-bold"
+          :class="{ 'bg-black': $q.dark.isActive }" :options="[
+            { label: '我的评价', value: 'review' },
+            { label: '我的进度', value: 'progress' },
+            { label: '分类整理', value: 'folder' }
+          ]" />
       </div>
       <div class="col-auto gt-sm row">
-        <q-select dense rounded outlined v-model="sortBy" :options="sortOptions" bg-color="white" class="q-mx-sm"/>
-        <q-btn
-          :disable="sortButtonDisabled"
-          dense
-          rounded
-          color="white"
-          :text-color="sortButtonDisabled? 'grey': 'black'"
-          :icon="direction? 'arrow_downward' : 'arrow_upward'"
-          @click="switchSortMode" 
-        />
+        <q-select dense rounded outlined v-model="sortBy" :options="sortOptions" class="q-mx-sm"
+          :bg-color="$q.dark.isActive ? 'black' : 'white'">
+        </q-select>
+        <q-btn :disable="sortButtonDisabled" dense rounded :icon="direction ? 'arrow_downward' : 'arrow_upward'"
+          :class="{ 'bg-black': $q.dark.isActive }" @click="switchSortMode" />
       </div>
 
     </div>
     <div class="q-pt-md q-px-sm">
-      <q-btn-toggle
-        v-if="mode === 'progress'"
-        v-model="progressFilter"
-        @input="changeProgressFilter"
-        toggle-color="primary"
-        color="white"
-        text-color="black"
-        rounded
-        :options="[
-          {label: '想听', value: 'marked'},
-          {label: '在听', value: 'listening'},
-          {label: '听过', value: 'listened'},
-          {label: '重听', value: 'replay'},
-          {label: '搁置', value: 'postponed'}
-        ]"
-      />
+      <q-btn-toggle v-if="mode === 'progress'" v-model="progressFilter" @input="changeProgressFilter"
+        toggle-color="primary" rounded :class="{ 'bg-black': $q.dark.isActive }" :options="[
+          { label: '想听', value: 'marked' },
+          { label: '在听', value: 'listening' },
+          { label: '听过', value: 'listened' },
+          { label: '重听', value: 'replay' },
+          { label: '搁置', value: 'postponed' }
+        ]" />
     </div>
 
     <div class="q-pt-md">
       <div class="q-px-sm q-py-md">
-        <q-infinite-scroll @load="onLoad" :offset="500" :disable="stopLoad" ref="scroll" v-if="mode !=='folder'">
+        <q-infinite-scroll @load="onLoad" :offset="500" :disable="stopLoad" ref="scroll" v-if="mode !== 'folder'">
           <div class="row justify-center text-grey" v-if="works.length === 0">在作品界面上点击星标、标记进度，标记的音声就会出现在这里啦</div>
           <q-list bordered separator class="shadow-2" v-if="works.length">
-             <FavListItem v-for="work in works" :key="work.id" :workid="work.id" :metadata="work" @reset="reset()" :mode="mode"></FavListItem> 
+            <FavListItem v-for="work in works" :key="work.id" :workid="work.id" :metadata="work" @reset="reset()"
+              :mode="mode"></FavListItem>
           </q-list>
           <template v-slot:loading>
             <div class="row justify-center q-my-md">
@@ -97,11 +75,11 @@ export default {
   },
 
   computed: {
-    direction () {
+    direction() {
       return this.sortMode === 'desc'
     },
 
-    sortButtonDisabled () {
+    sortButtonDisabled() {
       return this.sortBy.order === 'allage' || this.sortBy.order === 'nsfw'
     }
   },
@@ -112,12 +90,12 @@ export default {
       progressFilter: 'marked',
       works: [],
       stopLoad: false,
-      pagination: { currentPage:0, pageSize:12, totalCount:0 },
+      pagination: { currentPage: 0, pageSize: 12, totalCount: 0 },
       sortMode: 'desc',
       sortBy: {
-          label: '标记时间',
-          order: 'updated_at'
-        },
+        label: '标记时间',
+        order: 'updated_at'
+      },
       sortOptions: [
         {
           label: '标记时间',
@@ -190,6 +168,7 @@ export default {
   methods: {
     // Split two-way binding
     changeMode(newMode) {
+      this.works = []
       this.$router.push(`/favourites/${newMode}`);
       this.reset();
     },
@@ -201,22 +180,22 @@ export default {
     },
 
     switchSortMode() {
-      if(this.sortMode ==='desc') {
+      if (this.sortMode === 'desc') {
         this.sortMode = 'asc'
       } else {
         this.sortMode = 'desc'
       }
     },
 
-    onLoad (index, done) {
+    onLoad(index, done) {
       this.requestWorksQueue()
         .then(() => done())
     },
 
-    reset () {
+    reset() {
       // Freeze the scroller first
       this.stopLoad = true
-      this.pagination = { currentPage:0, pageSize:12, totalCount:0 }
+      this.pagination = { currentPage: 0, pageSize: 12, totalCount: 0 }
       // Manually fetch first page content before enable scroller
       // Note: the internal API of the infinite scroller does not work well
       this.requestWorksQueue()
@@ -225,7 +204,7 @@ export default {
         })
     },
 
-    requestWorksQueue () {
+    requestWorksQueue() {
       const params = {
         order: this.sortBy.order,
         sort: this.sortMode,
@@ -247,7 +226,7 @@ export default {
       }
 
       return this.$axios.get('/api/review', { params })
-        .then((response) => {                  
+        .then((response) => {
           const works = response.data.works
           this.works = (params.page === 1) ? works.concat() : this.works.concat(works)
           this.pagination = response.data.pagination

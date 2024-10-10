@@ -55,7 +55,10 @@ module.exports = function (ctx) {
         'LocalStorage',
         'SessionStorage',
         'Notify'
-      ]
+      ],
+      config: {
+        dark: false,
+      }
     },
 
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie

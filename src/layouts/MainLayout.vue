@@ -1,6 +1,6 @@
 <template>
-  <q-layout view="hHh Lpr lFf" class="bg-grey-3">
-    <q-header class="shadow-4">
+  <q-layout view="hHh Lpr lFf" :class="{ 'bg-grey-3': !$q.dark.isActive }">
+    <q-header class="shadow-4" :class="{ 'bg-dark': $q.dark.isActive }">
       <q-toolbar class="row justify-between">
         <q-btn flat dense round @click="drawerOpen = !drawerOpen" icon="menu" aria-label="Menu" />
         <!-- 左侧-返回按钮 -->
@@ -33,7 +33,8 @@
     </q-header>
 
     <q-drawer v-model="drawerOpen" show-if-above :mini="miniState" @mouseover="miniState = false"
-      @mouseout="miniState = true" mini-to-overlay :width="230" :breakpoint="500" bordered content-class="bg-grey-1">
+      @mouseout="miniState = true" mini-to-overlay :width="230" :breakpoint="500" bordered
+      :content-class="{ 'bg-grey-1': !$q.dark.isActive }">
       <q-scroll-area class="fit">
         <q-list>
           <q-item clickable v-ripple exact :to="link.path" active-class="text-deep-purple text-weight-medium"
@@ -75,10 +76,38 @@
         </q-list>
 
         <q-list>
+          <q-item clickable v-ripple exact active-class="text-deep-purple text-weight-medium" @click="toggleDarkMode">
+            <q-item-section avatar>
+              <q-icon
+                :name="getDarkMode() === 'auto' ? 'brightness_medium' : getDarkMode() ? 'mode_night' : 'light_mode'" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                深色模式
+              </q-item-label>
+              <q-item-label class="text-caption text-grey">
+                {{ $q.dark.mode === "auto" ? "跟随系统" : $q.dark.mode === true ? "已开启" : "已禁用" }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple exact :to="'/settings'" active-class="text-deep-purple text-weight-medium">
+            <q-item-section avatar>
+              <q-icon name="tune" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label class="text-subtitle1">
+                设置
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple exact :to="'/admin'" active-class="text-deep-purple text-weight-medium"
             v-if="userName === 'admin'">
             <q-item-section avatar>
-              <q-icon name="tune" />
+              <q-icon name="dashboard" />
             </q-item-section>
 
             <q-item-section>
@@ -183,19 +212,10 @@ export default {
     randId() {
       this.$router.push(`/work/RJ${this.randId}`);
     },
-    sharedConfig(config) {
-      this.SET_REWIND_SEEK_TIME(config.rewindSeekTime);
-      this.SET_FORWARD_SEEK_TIME(config.forwardSeekTime);
-    },
 
     "$route.query.keyword": {
       handler: function (keywords) {
-        this.keywords = [];
-        if (keywords) {
-          for (let kw of keywords.split(" ")) {
-              this.keywords.push(kw);
-          }
-        }
+        this.keywords = keywords ? keywords.split(" ") : [];
       },
     }
   },
@@ -224,6 +244,7 @@ export default {
       "SET_REWIND_SEEK_TIME",
       "SET_FORWARD_SEEK_TIME"
     ]),
+
     initKeyword() {
       if (this.$route.query.keyword) {
         for (let kw of this.$route.query.keyword.split(" ")) {
@@ -348,6 +369,22 @@ export default {
           }
         });
     },
+    // 深色功能
+    toggleDarkMode() {
+      const darkMode = this.getDarkMode()
+      console.log("toggleDarkMode called")
+      if (darkMode === false) {
+        this.$q.dark.set(true);
+      } else if (darkMode === true) {
+        this.$q.dark.set('auto')
+      } else {
+        this.$q.dark.set(false);
+      }
+      this.$q.localStorage.set("darkMode", this.$q.dark.mode);
+    },
+    getDarkMode() {
+      return this.$q.localStorage.getItem("darkMode");
+    },
     // 搜索功能
     onAddSearchKeyword() {
       const keyword = this.editKeyword.trim();
@@ -389,6 +426,9 @@ export default {
     back() {
       this.$router.go(-1);
     }
+  },
+  created() {
+    this.$q.dark.set(this.getDarkMode());
   }
 };
 </script>

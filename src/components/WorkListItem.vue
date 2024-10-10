@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable :to="`/work/${metadata.id}`" class="bg-white" style="padding: 5px;">
+  <q-item clickable :to="`/work/${metadata.id}`" style="padding: 5px;">
     <q-item-section avatar style="padding: 0px 5px 0px 0px;">
       <router-link :to="`/work/${metadata.id}`">
         <q-img transition="fade" :src="samCoverUrl" style="height: 60px; width: 60px;" />
@@ -8,7 +8,7 @@
 
     <q-item-section>
       <q-item-label lines="2" class="text">
-        <router-link :to="`/work/${metadata.id}`" class="text-black">
+        <router-link :to="`/work/${metadata.id}`" style="color: inherit;">
           {{ metadata.title }}
         </router-link>
       </q-item-label>

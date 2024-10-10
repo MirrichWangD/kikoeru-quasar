@@ -6,6 +6,7 @@ import Work from 'pages/Work'
 import List from 'pages/List'
 import Login from 'pages/Login'
 import Favourites from 'pages/Favourites'
+import Settings from 'pages/Settings'
 
 import Folders from 'pages/Dashboard/Folders'
 import Scanner from 'pages/Dashboard/Scanner'
@@ -75,6 +76,10 @@ const routes = [
         path: 'vas',
         props: { restrict: "vas" },
         component: List
+      },
+      {
+        path: "settings",
+        component: Settings
       },
       ...prefixRoutes('favourites', [
         {

@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable class="row bg-white">
+  <q-item clickable class="row" :class="{ 'bg-black': $q.dark.isActive }">
     <q-item-section class="col-auto" top>
       <router-link :to="`/work/RJ${metadata.id}`">
         <q-img transition="fade" :src="coverUrl" style="height: 120px; width: 160px;" />
@@ -8,7 +8,7 @@
 
     <q-item-section class="q-gutter-y-xs column items-start" top v-on:click.self="showReviewDialog = true">
       <q-item-label lines="2" class="text-body2">
-        <router-link :to="`/work/RJ${metadata.id}`" class="col-auto text-black">
+        <router-link :to="`/work/RJ${metadata.id}`" class="col-auto" style="color: inherit;">
           {{ metadata.title }}
         </router-link>
       </q-item-label>

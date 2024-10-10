@@ -239,22 +239,6 @@
             />
           </q-item-section>
         </q-item>
-
-        <q-item>
-          <q-item-section>
-            <q-item-label>每页显示的音声数量</q-item-label>
-            <q-item-label caption>默认 12</q-item-label>
-          </q-item-section>
-
-          <q-item-section avatar>
-            <q-input
-              v-model.number="config.pageSize"
-              type="number"
-              input-class="text-right"
-              style="max-width: 100px;"
-            />
-          </q-item-section>
-        </q-item>
       </q-list>
     </q-card>
 

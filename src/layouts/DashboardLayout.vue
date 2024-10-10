@@ -7,32 +7,13 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="drawer"
-      show-if-above
-
-      :mini="miniState"
-      @mouseover="miniState = false"
-      @mouseout="miniState = true"
-      mini-to-overlay
-
-      :width="200"
-      :breakpoint="500"
-      bordered
-      content-class="bg-grey-3"
-    >
+    <q-drawer v-model="drawer" show-if-above :mini="miniState" @mouseover="miniState = false"
+      @mouseout="miniState = true" mini-to-overlay :width="200" :breakpoint="500"
+      bordered :content-class="{ 'bg-grey-3': !$q.dark.isActive }">
       <div class="column justify-between fit">
         <q-list padding class="col-auto">
-          <q-item 
-            clickable
-            v-ripple
-            exact
-            :to="link.path"
-            active-class="text-primary text-weight-bold"
-            v-for="(link, index) in links"
-            :key="index"
-            class="col text-subtitle1"
-          >
+          <q-item clickable v-ripple exact :to="link.path" active-class="text-primary text-weight-bold"
+            v-for="(link, index) in links" :key="index" class="col text-subtitle1">
             <q-item-section avatar>
               <q-icon :name="link.icon" />
             </q-item-section>

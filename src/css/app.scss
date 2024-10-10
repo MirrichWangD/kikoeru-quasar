@@ -8,9 +8,13 @@
 // }
 
 a {
-  text-decoration:none;
+  text-decoration: none;
 }
 
-body {
-  color: #000 !important
+body.body--light {
+  color: #000;
+}
+
+body.body--dark {
+  color: #fff;
 }

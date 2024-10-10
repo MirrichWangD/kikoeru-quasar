@@ -8,9 +8,10 @@
       <div class="q-px-sm q-py-none">
         <!-- 标题 -->
         <div class="text-h6 text-weight-regular">
-          <router-link :to="`/work/RJ${metadata.id}`" class="text-black">
+          <h1 class="text-h6 text-weight-regular q-mb-none" style="overflow-wrap: break-word;"
+            :class="{ 'text-black': !$q.dark.isActive, 'text-white': $q.dark.isActive }">
             {{ metadata.title }}
-          </router-link>
+          </h1>
         </div>
 
         <!-- 社团名 -->
@@ -54,7 +55,7 @@
 
           <!-- 作品时长 -->
           <div class="col-auto q-pl-sm">
-            <q-icon name="schedule" size="xs" class="text-black" />
+            <q-icon name="schedule" size="xs" />
             <span class="text-grey"> ({{ formatSeconds(metadata.duration) }})</span>
           </div>
 
@@ -76,7 +77,7 @@
       <!-- 标签 -->
       <div class="q-px-none q-py-sm" v-if="showTags">
         <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key=index>
-          <q-chip size="md" class="shadow-4">
+          <q-chip size="md" class="shadow-4" :class="{ 'bg-grey-9': $q.dark.isActive }">
             {{ tag.name }}
           </q-chip>
         </router-link>

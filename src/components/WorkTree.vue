@@ -13,6 +13,9 @@
 
     <q-card>
       <q-list separator>
+        <q-item v-if="!stopLoad" class="non-selectable" style="align-items: center; justify-content: center;">
+          <q-spinner-dots color="primary" size="40px" />
+        </q-item>
         <q-item clickable v-ripple v-for="(item, index) in fatherFolder" :key="index" :active="item.type === 'audio' && currentPlayingFile.hash === item.hash
           " active-class="text-white bg-teal" @click="onClickItem(item)" class="non-selectable">
           <q-item-section avatar>
@@ -119,7 +122,8 @@ export default {
       preview_img_idx: 0,
       preview_img_list: [],
       preview_img_hash: "",
-      path: []
+      path: [],
+      stopLoad: false
     };
   },
 
@@ -192,6 +196,7 @@ export default {
         fatherFolder = fatherFolder[0].children;
       }
       this.path = initialPath;
+      this.stopLoad = true;
     },
 
     onClickBreadcrumb(index) {
