@@ -404,6 +404,11 @@ export default {
         } else {
           this.forward(true);
         }
+      } else if (event.key === "ArrowUp") {
+        this.SET_VOLUME(Math.round((this.volume + 0.01) * 100) / 100);
+      }
+      else if (event.key === "ArrowDown") {
+        this.SET_VOLUME(Math.round((this.volume - 0.01) * 100) / 100);
       }
     }
   }
