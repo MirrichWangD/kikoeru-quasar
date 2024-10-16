@@ -142,7 +142,6 @@ export default {
     }
 
     if (this.$q.localStorage.has("arrowLeftKey")) {
-      console.log(this.arrowLeftKeyOption);
       const arrowLeftKey = this.$q.localStorage.getItem("arrowLeftKey");
       this.arrowLeftKeyOption = this.arrowLeftKeyOptions.find((item) => item.value === arrowLeftKey);
     }
