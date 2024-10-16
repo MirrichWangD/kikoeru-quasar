@@ -127,7 +127,6 @@ export default {
   },
 
   mounted() {
-    console.log(localStorage);
     if (this.$q.localStorage.has("pageSize")) {
       this.pageSize = this.$q.localStorage.getItem("pageSize");
     }
