@@ -52,7 +52,37 @@
               @input="setForwardSeekTime" />
           </q-item-section>
         </q-item>
+      </q-list>
+    </q-card>
 
+    <q-toolbar>
+      <q-toolbar-title>快捷键设置</q-toolbar-title>
+    </q-toolbar>
+    <q-card class="q-py-sm">
+      <q-list separator>
+        <q-item>
+          <q-item-section avatar>
+            <q-icon flat dense size="md" name="arrow_left"></q-icon>
+          </q-item-section>
+          <q-item-section main>
+            <q-item-label>方向左键</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-select borderless v-model="arrowLeftKeyOption" :options="arrowLeftKeyOptions" @input="setArrowLeftKey"/>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section avatar>
+            <q-icon flat dense size="md" name="arrow_right"></q-icon>
+          </q-item-section>
+          <q-item-section main>
+            <q-item-label>方向右键</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-select borderless v-model="arrowRightKeyOption" :options="arrowRightKeyOptions"
+              @input="setArrowRightKey" />
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-card>
 
@@ -72,18 +102,32 @@ export default {
   data() {
     return {
       config: {},
+      // 页面数量设置
       pageSize: 12,
+      // 倒带、前进秒数设置
       rewindSeekTimeOption: { label: "5 秒", value: 5 },
       forwardSeekTimeOption: { label: "30 秒", value: 30 },
       seekTimeOptions: [
         { label: "5 秒", value: 5 },
         { label: "10 秒", value: 10 },
         { label: "30 秒", value: 30 }
+      ],
+      // 方向快捷键设置
+      arrowLeftKeyOption: { label: "倒带", value: "rewind" },
+      arrowRightKeyOption: { label: "前进", value: "forward" },
+      arrowLeftKeyOptions: [
+        { label: "倒带", value: "rewind" },
+        { label: "上一首", value: "previousTrack" }
+      ],
+      arrowRightKeyOptions: [
+        { label: "前进", value: "forward" },
+        { label: "下一首", value: "nextTrack" }
       ]
     };
   },
 
   mounted() {
+    console.log(localStorage);
     if (this.$q.localStorage.has("pageSize")) {
       this.pageSize = this.$q.localStorage.getItem("pageSize");
     }
@@ -97,6 +141,17 @@ export default {
       this.forwardSeekTimeOption = this.seekTimeOptions.find((item) => item.value === forwardSeekTime);
       this.SET_FORWARD_SEEK_TIME(forwardSeekTime);
     }
+
+    if (this.$q.localStorage.has("arrowLeftKey")) {
+      console.log(this.arrowLeftKeyOption);
+      const arrowLeftKey = this.$q.localStorage.getItem("arrowLeftKey");
+      this.arrowLeftKeyOption = this.arrowLeftKeyOptions.find((item) => item.value === arrowLeftKey);
+    }
+    
+    if (this.$q.localStorage.has("arrowRightKey")) {
+      const arrowRightKey = this.$q.localStorage.getItem("arrowRightKey");
+      this.arrowRightKeyOption = this.arrowRightKeyOptions.find((item) => item.value === arrowRightKey);
+    }
   },
 
   methods: {
@@ -104,6 +159,12 @@ export default {
       "SET_REWIND_SEEK_TIME",
       "SET_FORWARD_SEEK_TIME"
     ]),
+
+    setPageSize() {
+      console.log("set pageSize:", this.pageSize);
+      this.$q.localStorage.set("pageSize", parseInt(this.pageSize));
+      window.location.reload();
+    },
 
     setRewindSeekTime(newRewindSeekTimeOption) {
       console.log("set rewindSeekTime:", newRewindSeekTimeOption.value)
@@ -119,11 +180,16 @@ export default {
       this.$q.localStorage.set("forwardSeekTime", newForwardSeekTimeOption.value)
     },
 
-    setPageSize() {
-      console.log("set pageSize:", this.pageSize);
-      this.$q.localStorage.set("pageSize", parseInt(this.pageSize));
-      window.location.reload();
+    setArrowLeftKey(newLeftArrowKey) {
+      console.log("set left arrow key:", newLeftArrowKey.label);
+      this.$q.localStorage.set("arrowLeftKey", newLeftArrowKey.value);
     },
+
+    setArrowRightKey(newRightArrowKey) {
+      console.log("set right arrow key:", newRightArrowKey.label);
+      this.$q.localStorage.set("arrowRightKey", newRightArrowKey.value);
+    }
+
   }
 };
 </script>

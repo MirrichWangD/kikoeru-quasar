@@ -167,6 +167,10 @@ export default {
     if (localStorage.getItem("forwardSeekTime")) {
       this.SET_FORWARD_SEEK_TIME(this.$q.localStorage.getItem("forwardSeekTime"));
     }
+    document.addEventListener("keydown", this.handleKeydown)
+  },
+  beforeDestroy() {
+    document.removeEventListener("keydown", this.handleKeydown);
   },
 
   watch: {
@@ -287,7 +291,7 @@ export default {
       rewind: "SET_REWIND_SEEK_MODE",
       forward: "SET_FORWARD_SEEK_MODE",
     }),
-  
+
     ...mapMutations("AudioPlayer", [
       "SET_TRACK",
       "SET_QUEUE",
@@ -387,13 +391,21 @@ export default {
       }
     },
 
-    openPlayerSettings() {
-      this.showPlayerSettings = true;
-    },
-
-    hidePlayerSettings() {
-      this.showPlayerSettings = false;
-    },
+    handleKeydown(event) {
+      if (event.key === "ArrowLeft") {
+        if (this.$q.localStorage.getItem("arrowLeftKey") === "previousTrack") {
+          this.previousTrack();
+        } else {
+          this.rewind(true);
+        }
+      } else if (event.key === "ArrowRight") {
+        if (this.$q.localStorage.getItem("arrowRightKey") === "nextTrack") {
+          this.nextTrack();
+        } else {
+          this.forward(true);
+        }
+      }
+    }
   }
 };
 </script>
