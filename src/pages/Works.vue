@@ -150,7 +150,7 @@ export default {
 
   watch: {
     sortOption(newSortOptionSetting) {
-      const localSortOption = this.$q.localStorage.getItem("sortOption", {});
+      const localSortOption = this.$q.localStorage.getItem("sortOption") || {};
       if (localSortOption.label !== newSortOptionSetting.label) {
         this.$q.localStorage.set("sortOption", newSortOptionSetting);
         this.reset();
