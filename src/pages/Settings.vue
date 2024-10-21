@@ -52,6 +52,18 @@
               @input="setForwardSeekTime" />
           </q-item-section>
         </q-item>
+        <!-- 音频播放时切换至视频文件后是否暂停 -->
+        <q-item>
+          <q-item-section avatar>
+            <q-icon flat dense size="md" name="smart_display" />
+          </q-item-section>
+          <q-item-section main>
+            <q-item-label>音频播放中切换至视频播放后是否暂停</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-checkbox v-model="isVideoSwitchPause" @input="setIsVideoSwitchPause"/>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-card>
 
@@ -122,7 +134,9 @@ export default {
       arrowRightKeyOptions: [
         { label: "前进", value: "forward" },
         { label: "下一首", value: "nextTrack" }
-      ]
+      ],
+      // 音频切换至视频播放时是否暂停
+      isVideoSwitchPause: true
     };
   },
 
@@ -149,6 +163,10 @@ export default {
     if (this.$q.localStorage.has("arrowRightKey")) {
       const arrowRightKey = this.$q.localStorage.getItem("arrowRightKey");
       this.arrowRightKeyOption = this.arrowRightKeyOptions.find((item) => item.value === arrowRightKey);
+    }
+
+    if (this.$q.localStorage.has("isVideoSwitchPause")) {
+      this.isVideoSwitchPause = this.$q.localStorage.getItem("isVideoSwitchPause");
     }
   },
 
@@ -186,6 +204,11 @@ export default {
     setArrowRightKey(newRightArrowKey) {
       console.log("set right arrow key:", newRightArrowKey.label);
       this.$q.localStorage.set("arrowRightKey", newRightArrowKey.value);
+    },
+
+    setIsVideoSwitchPause(newIsVideoSwitchPause) {
+      console.log("set switch pause:", newIsVideoSwitchPause);
+      this.$q.localStorage.set("isVideoSwitchPause", newIsVideoSwitchPause);
     }
 
   }

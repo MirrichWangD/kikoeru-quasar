@@ -2,29 +2,90 @@
   <div class="q-ma-md">
     <q-breadcrumbs gutter="xs" v-if="path.length">
       <q-breadcrumbs-el>
-        <q-btn no-caps flat dense size="md" icon="folder" style="height: 30px;" @click="path = []">ROOT</q-btn>
+        <q-btn
+          no-caps
+          flat
+          dense
+          size="md"
+          icon="folder"
+          label="ROOT"
+          style="height: 30px;"
+          @click="path = []"
+        />
       </q-breadcrumbs-el>
 
-      <q-breadcrumbs-el v-for="(folderName, index) in path" :key="index" class="cursor-pointer">
-        <q-btn no-caps flat dense size="md" icon="folder" style="height: 30px;" @click="onClickBreadcrumb(index)">{{
-          folderName }}</q-btn>
+      <q-breadcrumbs-el
+        v-for="(folderName, index) in path"
+        :key="index"
+        class="cursor-pointer"
+      >
+        <q-btn
+          no-caps
+          flat
+          dense
+          size="md"
+          icon="folder"
+          style="height: 30px;"
+          :label="folderName"
+          @click="onClickBreadcrumb(index)"
+        />
       </q-breadcrumbs-el>
     </q-breadcrumbs>
 
     <q-card>
       <q-list separator>
-        <q-item v-if="!stopLoad" class="non-selectable" style="align-items: center; justify-content: center;">
+        <q-item
+          v-if="!stopLoad"
+          class="non-selectable"
+          style="align-items: center; justify-content: center;"
+        >
           <q-spinner-dots color="primary" size="40px" />
         </q-item>
-        <q-item clickable v-ripple v-for="(item, index) in fatherFolder" :key="index" :active="item.type === 'audio' && currentPlayingFile.hash === item.hash
-          " active-class="text-white bg-teal" @click="onClickItem(item)" class="non-selectable">
+        <q-item
+          clickable
+          v-ripple
+          v-for="(item, index) in fatherFolder"
+          :key="index"
+          :active="
+            item.type === 'audio' && currentPlayingFile.hash === item.hash
+          "
+          active-class="text-white bg-teal"
+          @click="onClickItem(item)"
+          class="non-selectable"
+        >
           <q-item-section avatar>
-            <q-icon size="34px" v-if="item.type === 'folder'" color="amber" name="folder" />
-            <q-icon size="34px" v-else-if="item.type === 'text'" color="info" name="description" />
-            <q-icon size="34px" v-else-if="item.type === 'image'" color="orange" name="photo" />
-            <q-icon size="34px" v-else-if="item.type === 'other'" color="info" name="description" />
-            <q-btn v-else round dense color="primary" :icon="playIcon(item.hash)"
-              @click="onClickPlayButton(item.hash)" />
+            <q-icon
+              size="34px"
+              v-if="item.type === 'folder'"
+              color="amber"
+              name="folder"
+            />
+            <q-icon
+              size="34px"
+              v-else-if="item.type === 'text'"
+              color="info"
+              name="description"
+            />
+            <q-icon
+              size="34px"
+              v-else-if="item.type === 'image'"
+              color="orange"
+              name="photo"
+            />
+            <q-icon
+              size="34px"
+              v-else-if="item.type === 'other'"
+              color="info"
+              name="description"
+            />
+            <q-btn
+              v-else
+              round
+              dense
+              color="primary"
+              :icon="playIcon(item.hash)"
+              @click="onClickPlayButton(item.hash)"
+            />
           </q-item-section>
 
           <q-item-section>
@@ -34,29 +95,48 @@
             }}</q-item-label>
 
             <!-- 音频文件时长 -->
-            <q-item-label v-if="item.type === 'audio' && typeof item.duration === 'number'" caption lines="1">
+            <q-item-label
+              v-if="item.type === 'audio' && typeof item.duration === 'number'"
+              caption
+              lines="1"
+            >
               <!-- <q-icon size="0.8rem" name="schedule" class="q-mr-xs" /> -->
               {{ formatSeconds(item.duration) }}
             </q-item-label>
           </q-item-section>
 
           <!-- 上下文菜单 -->
-          <q-menu v-if="
-            item.type === 'audio' ||
-            item.type === 'text' ||
-            item.type === 'image' ||
-            item.type === 'other'
-          " touch-position context-menu auto-close transition-show="jump-down" transition-hide="jump-up">
+          <q-menu
+            v-if="
+              item.type === 'audio' ||
+                item.type === 'text' ||
+                item.type === 'image' ||
+                item.type === 'other'
+            "
+            touch-position
+            context-menu
+            auto-close
+            transition-show="jump-down"
+            transition-hide="jump-up"
+          >
             <q-list separator>
-              <q-item clickable @click="addToQueue(item)" v-if="item.type === 'audio'">
+              <q-item
+                clickable
+                @click="addToQueue(item)"
+                v-if="item.type === 'audio'"
+              >
                 <q-item-section>添加到播放列表</q-item-section>
               </q-item>
 
-              <q-item clickable @click="playNext(item)" v-if="item.type === 'audio'">
+              <q-item
+                clickable
+                @click="playNext(item)"
+                v-if="item.type === 'audio'"
+              >
                 <q-item-section>下一曲播放</q-item-section>
               </q-item>
 
-              <q-item clickable @click="download(item)">
+              <q-item clickable @click="openFile(item, true)">
                 <q-item-section>下载文件</q-item-section>
               </q-item>
             </q-list>
@@ -65,43 +145,13 @@
       </q-list>
     </q-card>
 
-    <!-- 预览弹窗 -->
+    <!-- 预览窗口 -->
     <q-dialog v-model="showViewer" full-width>
-      <!-- 视频播放 -->
-      <q-card color="primary" class="q-pa-md" v-if="showVideo">
-        <div class="pull-handler" @click="hideViewer" />
-        <q-card-section>
-          <!-- <div class="row items-center view-container" v-if="showVideo"> -->
-          <video ref="video" class="video" controls autoplay />
-          <!-- </div> -->
-        </q-card-section>
-
-      </q-card>
-      <!-- 图片查看 -->
-      <q-card color="primary" v-if="!showVideo">
-        <q-card-section>
-          <div class="row items-center no-wrap">
-            <div class="col">
-              <div class="text-h6 ellipsis">{{ preview_img_name }}</div>
-              <div class="text-subtitle2">{{ preview_img_idx + 1 }}/{{ preview_img_list.length }}</div>
-            </div>
-            <div class="col-auto">
-              <q-btn outline @click="openFile(preview_img_list[preview_img_idx])">全屏显示</q-btn>
-            </div>
-          </div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <q-img class="image" :src="preview_img_url" contain />
-        </q-card-section>
-
-
-        <q-card-actions align="around">
-          <q-btn flat label="上一个" color="primary" @click="changePreviewImg(false)" />
-          <q-btn flat label="关闭" color="negative" v-close-popup />
-          <q-btn flat label="下一个" color="primary" @click="changePreviewImg(true)" />
-        </q-card-actions>
-
-      </q-card>
+      <MediaViewer
+        :files="viewerFiles"
+        :index="viewerFileIndex"
+        @close="showViewer = false"
+      />
     </q-dialog>
     <span class="flex flex-center text-grey">&nbsp;</span>
   </div>
@@ -110,18 +160,20 @@
 <script>
 // import axios from "axios";
 import { mapState, mapGetters } from "vuex";
+import MediaViewer from "./MediaViewer.vue";
 
 export default {
   name: "WorkTree",
 
+  components: {
+    MediaViewer
+  },
+
   data() {
     return {
       showViewer: false,
-      showVideo: false,
-      preview_img: false,
-      preview_img_idx: 0,
-      preview_img_list: [],
-      preview_img_hash: "",
+      viewerFiles: [],
+      viewerFileIndex: 0,
       path: [],
       stopLoad: false
     };
@@ -162,16 +214,6 @@ export default {
       return queue;
     },
 
-    preview_img_url() {
-      const item = this.preview_img_list[this.preview_img_idx];
-      return item ? this.originalMediaSrc(item) : "";
-    },
-
-    preview_img_name() {
-      const item = this.preview_img_list[this.preview_img_idx];
-      return item ? item.title : "";
-    },
-
     ...mapState("AudioPlayer", ["playing"]),
 
     ...mapGetters("AudioPlayer", ["currentPlayingFile"])
@@ -209,10 +251,12 @@ export default {
         this.path.push(item.title);
       } else if (item.type === "text") {
         this.openFile(item);
-      } else if (item.type === "image" || ext === "mp4") {
+      } else if (item.type === "image") {
         this.openViewer(item);
+      } else if (["mp4", "mkv"].includes(ext)) {
+        this.openViewer(item, ext);
       } else if (item.type === "other") {
-        this.download(item);
+        this.openFile(item, true);
       } else if (this.currentPlayingFile.hash !== item.hash) {
         this.$store.commit("AudioPlayer/SET_QUEUE", {
           queue: this.queue.concat(),
@@ -237,7 +281,7 @@ export default {
           });
         }
       } else {
-        this.openViewer(nextFile);
+        this.openViewer(nextFile, ext);
       }
     },
 
@@ -249,69 +293,41 @@ export default {
       this.$store.commit("AudioPlayer/PLAY_NEXT", file);
     },
 
-    download(file) {
-      const token = this.$q.localStorage.getItem("jwt-token") || "";
-      // Fallback to old API for an old backend
-      const url = file.mediaDownloadUrl
-        ? `${file.mediaDownloadUrl}?token=${token}`
-        : `/api/media/download/${file.hash}?token=${token}`;
+    openFile(file, isDownload = false) {
       const link = document.createElement("a");
-      link.href = url;
+      link.href = this.getMediaUrl(file, isDownload);
       link.target = "_blank";
       link.click();
     },
-
-    openFile(file) {
-      const url = this.originalMediaSrc(file);
-      const link = document.createElement("a");
-      link.href = url;
-      link.target = "_blank";
-      link.click();
-    },
-
-    openViewer(file) {
-      const url = this.originalMediaSrc(file);
+    // 图片&视频查看器
+    openViewer(file, ext = "") {
       this.showViewer = true;
-      this.showVideo = (file.type === "image") ? false : true;
-      if (file.type === "image") {
-        this.openPreviewImg(file);
-      } else {
-        this.$store.commit("AudioPlayer/EMPTY_QUEUE");
-        this.$nextTick(() => {
-          this.$refs.video.src = url
-        })
-      }
-    },
-
-    originalMediaSrc(file) {
-      const token = this.$q.localStorage.getItem('jwt-token') || '';
-      // Fallback to old API for an old backend 
-      const url = file.mediaStreamUrl ? `${file.mediaStreamUrl}?token=${token}` : `/api/media/stream/${file.hash}?token=${token}`;
-      return url
-    },
-
-    openPreviewImg(item) {
-      const preview_img_list = this.fatherFolder.filter(item => item.type === 'image')
-      let preview_img_idx = -1;
-      preview_img_list.forEach((i, idx) => {
-        if (i.hash === item.hash) {
-          preview_img_idx = idx;
+      this.viewerFiles = this.fatherFolder.filter(item => {
+        if (ext.length) {
+          return this.getFileExt(item.title) === ext;
+        } else {
+          return item.type === "image";
         }
       });
-      this.preview_img = true;
-      this.preview_img_list = preview_img_list;
-      this.preview_img_idx = preview_img_idx;
+      this.viewerFileIndex = this.viewerFiles.findIndex(
+        item => item.hash === file.hash
+      );
     },
 
-    changePreviewImg(next) {
-      if (this.preview_img_list.length <= 1) return;
-      const length = this.preview_img_list.length;
-      this.preview_img_idx = (length + this.preview_img_idx + (next ? 1 : -1)) % length;
-    },
-
-
-    hideViewer() {
-      this.showViewer = false;
+    getMediaUrl(file, isDownload = false) {
+      const token = this.$q.localStorage.getItem("jwt-token") || "";
+      // Fallback to old API for an old backend
+      let url;
+      if (isDownload === true) {
+        url = file.mediaDownloadUrl
+          ? `${file.mediaDownloadUrl}?token=${token}`
+          : `/api/media/download/${file.hash}?token=${token}`;
+      } else {
+        url = file.mediaStreamUrl
+          ? `${file.mediaStreamUrl}?token=${token}`
+          : `/api/media/stream/${file.hash}?token=${token}`;
+      }
+      return url;
     },
 
     getFileExt(val) {
@@ -340,51 +356,3 @@ export default {
   }
 };
 </script>
-<style>
-.pull-handler {
-  height: 6px;
-  width: 100px;
-  background: rgba(150, 122, 116, 0.5);
-  position: absolute;
-  border-radius: 4px !important;
-  overflow: hidden;
-  left: 50%;
-  top: 12px;
-  transform: translateX(-50%);
-  transition: 0.3s;
-  cursor: pointer;
-}
-
-.pull-handler:hover {
-  background: rgba(150, 122, 116, 0.8);
-}
-
-.pull-handler:before {
-  content: "";
-  position: absolute;
-  left: -50px;
-  right: -50px;
-  top: -10px;
-  bottom: -10px;
-  cursor: pointer;
-}
-
-.view-container {
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-}
-
-.video {
-  width: 100%;
-  max-height: calc(100vh - 100pt);
-  object-fit: contain;
-  background-color: black;
-}
-
-.image {
-  width: 100%;
-  height: calc(100vh - 200pt);
-}
-</style>

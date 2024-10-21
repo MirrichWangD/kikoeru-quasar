@@ -54,7 +54,8 @@ module.exports = function (ctx) {
       plugins: [
         'LocalStorage',
         'SessionStorage',
-        'Notify'
+        'Notify',
+        'AppFullscreen'
       ],
       config: {
         dark: false,
