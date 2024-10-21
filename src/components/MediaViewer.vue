@@ -98,7 +98,6 @@ export default {
   computed: {
     ...mapState("AudioPlayer", ["playing"]),
     currentFile() {
-      console.log(`currentFile called`);
       const file = this.files[this.currentIndex];
       const isVideoSwitchPause = this.$q.localStorage.has("isVideoSwitchPause")
         ? this.$q.localStorage.getItem("isVideoSwitchPause")
@@ -110,7 +109,7 @@ export default {
     }
   },
   mounted() {
-    console.log("mounted", this.$store.currentPlayingFile);
+    console.log("MediaViewer called");
     document.addEventListener("keydown", this.handleChangeKeydown);
   },
   methods: {
