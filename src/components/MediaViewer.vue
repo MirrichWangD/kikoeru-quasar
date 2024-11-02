@@ -1,83 +1,113 @@
 <template>
-  <q-card class="q-pa-none q-ma-none">
-    <!-- title -->
-    <q-card-section class="row justify-between items-center">
-      <div>
-        <div class="text-h6 ellipsis">{{ currentFile.title }}</div>
-        <div class="text-subtitle2">
-          {{ currentIndex + 1 }}/{{ files.length }}
+  <div>
+    <q-card class="fixed-center q-pa-none q-ma-none media-viewer">
+      <!-- title -->
+      <q-card-section class="row justify-between items-center q-pa-sm">
+        <div>
+          <q-btn flat dense icon="info" @click="clickInfo" />
+          <div>
+            <q-tooltip v-model="showInfo">{{ currentSize }}</q-tooltip>
+          </div>
         </div>
-      </div>
-      <div>
-        <q-btn
-          icon="close"
-          @click="$emit('close')"
-          :style="{ backgroundColor: $q.dark.isActive ? '#121212' : '' }"
-        />
-      </div>
-    </q-card-section>
-    <!-- content -->
-    <q-card-section
-      class="row justify-center items-center"
-      :style="{ backgroundColor: $q.dark.isActive ? '#121212' : '' }"
-    >
-      <!-- 中心大图/视频 -->
-      <div ref="fullscreenContainer">
-        <q-img
-          v-if="currentFile.type === 'image'"
-          :src="getMediaUrl(currentFile)"
-          style="width: calc(100vw - 200pt); max-height: calc(100vh - 200pt);"
-          contain
-        />
-        <video
-          v-else
-          :src="getMediaUrl(currentFile)"
-          style="max-width: calc(100vw - 200pt); max-height: calc(100vh - 200pt);"
-          controls
-          autoplay
-        />
-      </div>
-    </q-card-section>
-    <!-- controls -->
-    <q-card-actions class="justify-center">
-      <q-btn
-        icon="arrow_left"
-        @click="clickPrevious"
-        :style="{ backgroundColor: $q.dark.isActive ? '#121212' : '' }"
+        <div>
+          <div class="text-subtitle1 text-center ellipsis absolute-center">
+            {{ files[currentIndex].title }}
+          </div>
+        </div>
+        <div>
+          <q-btn flat dense icon="close" @click="$emit('close')" />
+        </div>
+      </q-card-section>
+      <!-- content -->
+      <q-card-section
+        class="row justify-center items-center q-pa-md content-section"
+        :class="{
+          dark: $q.dark.isActive
+        }"
       >
-        <q-tooltip>上一个 (快捷键: Ctrl + ←)</q-tooltip>
-      </q-btn>
-      <q-btn
-        icon="download"
-        @click="clickDownload"
-        :style="{ backgroundColor: $q.dark.isActive ? '#121212' : '' }"
+        <div class="absolute-left q-ml-md">
+          <q-btn flat dense icon="arrow_left" @click="clickPrevious" style="top: 50%; z-index: 1;" />
+        </div>
+        <!-- 中心大图/视频 -->
+        <div class="row justify-center items-center content-container" ref="fullscreenContainer">
+          <img
+            v-if="files[currentIndex].type === 'image'"
+            id="image"
+            class="content"
+            :src="getMediaUrl(files[currentIndex])"
+            :style="contentStyle"
+            @dblclick="clickFullscreen"
+            contain
+          />
+          <video
+            v-else
+            id="video"
+            class="content"
+            :src="getMediaUrl(files[currentIndex])"
+            :style="contentStyle"
+            @play="videoPlaying = true"
+            @pause="videoPlaying = false"
+            @ended="videoPlaying = false"
+            controls
+            autoplay
+          />
+        </div>
+        <div class="absolute-right q-mr-md">
+          <q-btn flat dense icon="arrow_right" @click="clickNext" style="top: 50%; z-index: 1;" />
+        </div>
+      </q-card-section>
+      <q-card-section
+        v-if="showThumbnail"
+        class="row justify-center items-center q-pa-none thumbnail-section"
+        :class="{ dark: $q.dark.isActive }"
       >
-        <q-tooltip>下载</q-tooltip>
-      </q-btn>
-      <q-btn
-        icon="fullscreen"
-        @click="clickFullscreen"
-        :style="{ backgroundColor: $q.dark.isActive ? '#121212' : '' }"
-      >
-        <q-tooltip>全屏显示</q-tooltip>
-      </q-btn>
-      <q-btn
-        icon="arrow_right"
-        @click="clickNext"
-        :style="{ backgroundColor: $q.dark.isActive ? '#121212' : '' }"
-      >
-        <q-tooltip>下一个 (快捷键: Ctrl + →)</q-tooltip></q-btn
-      >
-    </q-card-actions>
-  </q-card>
+        <q-scroll-area class="row justify-center items-center thumbnail" ref="scrollArea">
+          <div class="row no-wrap row justify-center items-center">
+            <div
+              ref="thumbnails"
+              class="q-mr-sm thumbnail-item"
+              v-for="(file, index) in files"
+              :key="index"
+              :class="{
+                active: currentIndex === index,
+                dark: $q.dark.isActive
+              }"
+              @click="clickThumbnailItem(index)"
+            >
+              <q-img v-if="file.type === 'image'" :src="getMediaUrl(file)" contain style="height: 100%;" />
+              <div v-else style="width: 100%; height: 100%;">
+                <video id="video" class="content" :src="getMediaUrl(file)" style="width: 100%; height: 100%;" />
+                <q-icon :name="videoPlayingIcon" class="play-button" :class="{ dark: $q.dark.isActive }" />
+              </div>
+
+              <div class="text-center ellipsis thumbnail-title" :class="{ dark: $q.dark.isActive }">
+                {{ file.title }}
+              </div>
+            </div>
+          </div>
+        </q-scroll-area>
+      </q-card-section>
+      <!-- controls -->
+      <q-card-section class="row justify-center items-center q-ma-sm">
+        <div class="absolute-left">
+          <q-btn flat dense icon="auto_awesome_motion" @click="clickThumbnail" />
+          <q-btn flat dense icon="download" @click="clickDownload" />
+        </div>
+        <div class="text-subtitle1 absolute-center">{{ currentIndex + 1 }} / {{ files.length }}</div>
+        <div class="absolute-right">
+          <q-btn flat dense icon="open_in_full" @click="clickFullscreen" />
+        </div>
+      </q-card-section>
+    </q-card>
+  </div>
 </template>
 
 <script>
-import { AppFullscreen } from "quasar";
-import { mapState } from "vuex";
+import { AppFullscreen } from 'quasar';
+import { mapState } from 'vuex';
 
 export default {
-  name: "MediaViewer",
+  name: 'MediaViewer',
 
   props: {
     files: {
@@ -89,32 +119,67 @@ export default {
       required: true
     }
   },
+
   data() {
     return {
       currentIndex: this.index,
-      showThumbnail: false
+      currentSize: '',
+      showThumbnail: false,
+      showInfo: false,
+      videoPlaying: false
     };
   },
+
   computed: {
-    ...mapState("AudioPlayer", ["playing"]),
-    currentFile() {
-      const file = this.files[this.currentIndex];
-      const isVideoSwitchPause = this.$q.localStorage.has("isVideoSwitchPause")
-        ? this.$q.localStorage.getItem("isVideoSwitchPause")
-        : true;
-      if (file.type === "audio" && this.playing && isVideoSwitchPause) {
-        this.$store.commit("AudioPlayer/TOGGLE_PLAYING");
-      }
-      return file;
+    ...mapState('AudioPlayer', ['playing']),
+
+    contentStyle() {
+      return {
+        height: AppFullscreen.isActive ? '100%' : 'auto',
+        maxHeight: AppFullscreen.isActive ? '100%' : 'calc(100vh - 200pt)'
+      };
+    },
+
+    videoPlayingIcon() {
+      return this.videoPlaying ? 'pause' : 'play_arrow';
     }
   },
+
   mounted() {
-    console.log("MediaViewer called");
-    document.addEventListener("keydown", this.handleChangeKeydown);
+    document.addEventListener('keydown', this.handleKeydown);
+    if (this.files[this.currentIndex].type === 'audio' && this.playing) {
+      this.$store.commit('AudioPlayer/TOGGLE_PLAYING');
+    }
   },
+
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeydown);
+  },
+
   methods: {
+    scrollToThumbnail(idx) {
+      this.$nextTick(() => {
+        const thumbnail = this.$refs.thumbnails[idx]; // 当前缩略图元素
+        const scrollArea = this.$refs.scrollArea.$el; // 滚动区域元素
+
+        if (thumbnail && scrollArea) {
+          // 获取缩略图的偏移量
+          const thumbnailOffsetLeft = thumbnail.offsetLeft;
+          const scrollAreaWidth = scrollArea.clientWidth;
+          const thumbnailWidth = thumbnail.offsetWidth;
+
+          // 计算需要滚动的位置，让缩略图在视图中央
+          const scrollPosition = thumbnailOffsetLeft - scrollAreaWidth / 2 + thumbnailWidth / 2;
+
+          // console.log("scroll", scrollPosition);
+          // 设置滚动行为，让缩略图居中
+          this.$refs.scrollArea.setScrollPosition('horizontal', scrollPosition, 300);
+        }
+      });
+    },
+
     getMediaUrl(file, isDownload = false) {
-      const token = this.$q.localStorage.getItem("jwt-token") || "";
+      const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
       let url;
       if (isDownload === true) {
@@ -129,43 +194,212 @@ export default {
       return url;
     },
 
+    clickInfo() {
+      this.showInfo = !this.showInfo;
+      this.currentSize = '';
+      if (this.files[this.currentIndex].type === 'audio') {
+        const video = document.getElementById('video');
+        this.currentSize = `${video.videoWidth} × ${video.videoHeight}`;
+      } else {
+        const image = document.getElementById('image');
+        this.currentSize = `${image.naturalWidth} × ${image.naturalHeight}`;
+        console.log(image);
+      }
+      console.log(this.currentSize);
+    },
+
     clickPrevious() {
       if (this.currentIndex > 0) {
         this.currentIndex--;
+        if (this.showThumbnail) {
+          this.scrollToThumbnail(this.currentIndex);
+        }
       }
     },
+
     clickNext() {
       if (this.currentIndex < this.files.length - 1) {
         this.currentIndex++;
+        if (this.showThumbnail) {
+          this.scrollToThumbnail(this.currentIndex);
+        }
       }
     },
+
     clickDownload() {
       const file = this.files[this.currentIndex];
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = this.getMediaUrl(file, true);
-      link.setAttribute("download", file.title); // 可选: 提供下载时的默认文件名
+      link.setAttribute('download', file.title); // 可选: 提供下载时的默认文件名
       link.click();
     },
 
     clickFullscreen() {
-      const container = this.$refs.fullscreenContainer;
-      try {
-        if (AppFullscreen.isActive) {
-          AppFullscreen.exit();
-        } else {
-          AppFullscreen.request(container);
+      if (this.files[this.currentIndex].type === 'audio') {
+        const video = document.getElementById('video');
+        if (video.requestFullscreen) {
+          video.requestFullscreen();
+        } else if (video.webkitRequestFullscreen) {
+          // Safari
+          video.webkitRequestFullscreen();
+        } else if (video.msRequestFullscreen) {
+          // IE/Edge
+          video.msRequestFullscreen();
         }
-      } catch (error) {
-        console.error("Failed to enter fullscreen mode:", error);
+      } else {
+        const container = this.$refs.fullscreenContainer;
+        try {
+          if (AppFullscreen.isActive) {
+            AppFullscreen.exit();
+          } else {
+            AppFullscreen.request(container);
+          }
+        } catch (error) {
+          console.error('Failed to enter fullscreen mode:', error);
+        }
       }
     },
-    handleChangeKeydown(event) {
-      if (event.ctrlKey && event.key === "ArrowLeft") {
+
+    clickThumbnail() {
+      this.showThumbnail = !this.showThumbnail;
+      if (this.showThumbnail) this.scrollToThumbnail(this.currentIndex);
+    },
+
+    clickThumbnailItem(index) {
+      this.currentIndex = index;
+      this.scrollToThumbnail(this.currentIndex);
+      if (this.files[this.currentIndex].type === 'audio') {
+        this.$nextTick(() => {
+          const video = document.getElementById('video');
+          if (this.videoPlaying) {
+            video.pause();
+          } else {
+            video.play();
+          }
+        });
+      }
+    },
+
+    handleKeydown(event) {
+      if (event.key === 'PageDown') {
         this.clickPrevious();
-      } else if (event.ctrlKey && event.key === "ArrowRight") {
+      } else if (event.key === 'PageUp') {
         this.clickNext();
       }
     }
   }
 };
 </script>
+<style lang="scss" scoped>
+.media-viewer {
+  // 宽度 > $breakpoint-sm-min
+  @media (min-width: $breakpoint-sm-min) {
+    width: 1200px;
+  }
+
+  // 宽度 < $breakpoint-xs-max (599px)
+  @media (max-width: $breakpoint-xs-max) {
+    width: 95%;
+  }
+
+  border-radius: 8px;
+
+  transition: 0.6s;
+
+  display: flex;
+  flex-direction: column;
+}
+.content-section {
+  background-color: #eeeeee;
+}
+.content-container {
+  width: 90%;
+  height: 100%;
+}
+.content {
+  width: 100%;
+  object-fit: contain;
+  z-index: 0;
+}
+.thumbnail-section {
+  background-color: #eeeeee;
+}
+.thumbnail {
+  @media (min-width: $breakpoint-sm-min) {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  // 宽度 < $breakpoint-xs-max (599px)
+  @media (max-width: $breakpoint-xs-max) {
+    width: 95%;
+    max-width: 95%;
+  }
+  height: 100px;
+  overflow-x: auto;
+}
+.thumbnail-item {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  border: 2px solid #bbb;
+  background-color: #eeeeee;
+  padding: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.thumbnail-item.active {
+  border-color: #1976d2;
+}
+.thumbnail-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.5); /* 半透明灰色背景 */
+  color: black;
+  font-size: 12px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.dark {
+  background-color: #121212;
+}
+.dark.thumbnail-item {
+  background-color: #121212;
+  border-color: #555;
+  color: white;
+}
+.dark.thumbnail-item.active {
+  border-color: #1976d2;
+}
+.dark.thumbnail-title {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+}
+.play-button {
+  @media (min-width: $breakpoint-sm-min) {
+    top: 38%;
+  }
+
+  // 宽度 < $breakpoint-xs-max (599px)
+  @media (max-width: $breakpoint-xs-max) {
+    top: 34%;
+  }
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  color: #121212;
+  background-color: rgba(255, 255, 255, 0.4); /* 半透明背景 */
+  border-radius: 50%;
+  padding: 6px;
+  cursor: pointer;
+  z-index: 2; /* 确保按钮在视频之上 */
+}
+.dark.play-button {
+  color: rgb(206, 194, 194);
+  background-color: rgba(0, 0, 0, 0.45);
+}
+</style>

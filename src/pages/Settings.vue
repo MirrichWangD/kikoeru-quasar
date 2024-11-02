@@ -52,49 +52,6 @@
               @input="setForwardSeekTime" />
           </q-item-section>
         </q-item>
-        <!-- 音频播放时切换至视频文件后是否暂停 -->
-        <q-item>
-          <q-item-section avatar>
-            <q-icon flat dense size="md" name="smart_display" />
-          </q-item-section>
-          <q-item-section main>
-            <q-item-label>音频播放中切换至视频播放后是否暂停</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-checkbox v-model="isVideoSwitchPause" @input="setIsVideoSwitchPause"/>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card>
-
-    <q-toolbar>
-      <q-toolbar-title>快捷键设置</q-toolbar-title>
-    </q-toolbar>
-    <q-card class="q-py-sm">
-      <q-list separator>
-        <q-item>
-          <q-item-section avatar>
-            <q-icon flat dense size="md" name="arrow_left"></q-icon>
-          </q-item-section>
-          <q-item-section main>
-            <q-item-label>方向左键</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-select borderless v-model="arrowLeftKeyOption" :options="arrowLeftKeyOptions" @input="setArrowLeftKey"/>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section avatar>
-            <q-icon flat dense size="md" name="arrow_right"></q-icon>
-          </q-item-section>
-          <q-item-section main>
-            <q-item-label>方向右键</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-select borderless v-model="arrowRightKeyOption" :options="arrowRightKeyOptions"
-              @input="setArrowRightKey" />
-          </q-item-section>
-        </q-item>
       </q-list>
     </q-card>
 
@@ -123,20 +80,7 @@ export default {
         { label: "5 秒", value: 5 },
         { label: "10 秒", value: 10 },
         { label: "30 秒", value: 30 }
-      ],
-      // 方向快捷键设置
-      arrowLeftKeyOption: { label: "倒带", value: "rewind" },
-      arrowRightKeyOption: { label: "前进", value: "forward" },
-      arrowLeftKeyOptions: [
-        { label: "倒带", value: "rewind" },
-        { label: "上一首", value: "previousTrack" }
-      ],
-      arrowRightKeyOptions: [
-        { label: "前进", value: "forward" },
-        { label: "下一首", value: "nextTrack" }
-      ],
-      // 音频切换至视频播放时是否暂停
-      isVideoSwitchPause: true
+      ]
     };
   },
 
@@ -153,20 +97,6 @@ export default {
       const forwardSeekTime = this.$q.localStorage.getItem("forwardSeekTime");
       this.forwardSeekTimeOption = this.seekTimeOptions.find((item) => item.value === forwardSeekTime);
       this.SET_FORWARD_SEEK_TIME(forwardSeekTime);
-    }
-
-    if (this.$q.localStorage.has("arrowLeftKey")) {
-      const arrowLeftKey = this.$q.localStorage.getItem("arrowLeftKey");
-      this.arrowLeftKeyOption = this.arrowLeftKeyOptions.find((item) => item.value === arrowLeftKey);
-    }
-    
-    if (this.$q.localStorage.has("arrowRightKey")) {
-      const arrowRightKey = this.$q.localStorage.getItem("arrowRightKey");
-      this.arrowRightKeyOption = this.arrowRightKeyOptions.find((item) => item.value === arrowRightKey);
-    }
-
-    if (this.$q.localStorage.has("isVideoSwitchPause")) {
-      this.isVideoSwitchPause = this.$q.localStorage.getItem("isVideoSwitchPause");
     }
   },
 
@@ -200,17 +130,6 @@ export default {
       console.log("set left arrow key:", newLeftArrowKey.label);
       this.$q.localStorage.set("arrowLeftKey", newLeftArrowKey.value);
     },
-
-    setArrowRightKey(newRightArrowKey) {
-      console.log("set right arrow key:", newRightArrowKey.label);
-      this.$q.localStorage.set("arrowRightKey", newRightArrowKey.value);
-    },
-
-    setIsVideoSwitchPause(newIsVideoSwitchPause) {
-      console.log("set switch pause:", newIsVideoSwitchPause);
-      this.$q.localStorage.set("isVideoSwitchPause", newIsVideoSwitchPause);
-    }
-
   }
 };
 </script>

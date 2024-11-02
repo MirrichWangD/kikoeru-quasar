@@ -304,10 +304,10 @@ export default {
         this.$q.localStorage.getItem("forwardSeekTime")
       );
     }
-    document.addEventListener("keydown", this.handlePlayingKeydown);
+    document.addEventListener("keydown", this.handleKeydown);
   },
   beforeDestroy() {
-    document.removeEventListener("keydown", this.handlePlayingKeydown);
+    document.removeEventListener("keydown", this.handleKeydown);
   },
 
   watch: {
@@ -528,27 +528,15 @@ export default {
       }
     },
 
-    handlePlayingKeydown(event) {
-      if (this.playing) {
-        if (event.key === "ArrowLeft") {
-          if (
-            this.$q.localStorage.getItem("arrowLeftKey") === "previousTrack"
-          ) {
-            this.previousTrack();
-          } else {
-            this.rewind(true);
-          }
-        } else if (event.key === "ArrowRight") {
-          if (this.$q.localStorage.getItem("arrowRightKey") === "nextTrack") {
-            this.nextTrack();
-          } else {
-            this.forward(true);
-          }
-        } else if (event.key === "ArrowUp") {
-          this.SET_VOLUME(Math.round((this.volume + 0.01) * 100) / 100);
-        } else if (event.key === "ArrowDown") {
-          this.SET_VOLUME(Math.round((this.volume - 0.01) * 100) / 100);
-        }
+    handleKeydown(event) {
+      if (event.key === "ArrowLeft") {
+        this.rewind(true);
+      } else if (event.key === "ArrowRight") {
+        this.forward(true);
+      } else if (event.key === "ArrowUp") {
+        this.setVolume(Math.round((this.volume + 0.01) * 100) / 100);
+      } else if (event.key === "ArrowDown") {
+        this.setVolume(Math.round((this.volume - 0.01) * 100) / 100);
       }
     }
   }
