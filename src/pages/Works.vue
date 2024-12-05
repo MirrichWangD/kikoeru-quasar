@@ -166,6 +166,9 @@ export default {
     if (this.$q.localStorage.has('showMode')) {
       this.showMode = this.$q.localStorage.getItem('showMode');
     }
+    if (this.$q.localStorage.has('keywords')) {
+      this.keywords = localStorage.keywords ? localStorage.keywords.split(' ') : [];
+    }
   },
 
   computed: {
