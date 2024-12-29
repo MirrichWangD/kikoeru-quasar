@@ -30,14 +30,14 @@
         </div>
         <!-- 中心大图/视频 -->
         <div class="row justify-center items-center content-container" ref="fullscreenContainer">
-          <img
+          <q-img
             v-if="files[currentIndex].type === 'image'"
             id="image"
             class="content"
             :src="getMediaUrl(files[currentIndex])"
             :style="contentStyle"
             @dblclick="clickFullscreen"
-            contain
+            contain 
           />
           <video
             v-else

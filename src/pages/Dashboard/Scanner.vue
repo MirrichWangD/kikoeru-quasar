@@ -62,7 +62,7 @@
 
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="tasks" class="q-pa-none">
-          <q-virtual-scroll separator style="max-height: 313px;" :items="tasks" :virtual-scroll-item-size="52">
+          <q-virtual-scroll separator :items="tasks" :virtual-scroll-item-size="52">
             <template v-slot="{ item, index }">
               <q-expansion-item expand-separator :key="index">
                 <template v-slot:header>
