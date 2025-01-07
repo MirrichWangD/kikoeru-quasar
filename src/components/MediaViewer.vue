@@ -4,10 +4,26 @@
       <!-- title -->
       <q-card-section class="row justify-between items-center q-pa-sm">
         <div>
-          <q-btn flat dense icon="info" @click="clickInfo" />
-          <div>
-            <q-tooltip v-model="showInfo">{{ currentSize }}</q-tooltip>
-          </div>
+          <q-btn flat dense icon="help">
+            <q-tooltip>
+              <div class="text-subtitle2">
+                <q-icon dense name="auto_awesome_motion" />
+                显示缩略图
+              </div>
+              <div class="text-subtitle2">
+                <q-icon name="pageview" />
+                新页面查看
+              </div>
+              <div class="text-subtitle2">
+                <q-icon name="download" />
+                下载文件
+              </div>
+              <div class="text-subtitle2">
+                <q-icon name="open_in_full" />
+                全屏幕显示
+              </div>
+            </q-tooltip>
+          </q-btn>
         </div>
         <div>
           <div class="text-subtitle1 text-center ellipsis absolute-center">
@@ -37,7 +53,7 @@
             :src="getMediaUrl(files[currentIndex])"
             :style="contentStyle"
             @dblclick="clickFullscreen"
-            contain 
+            contain
           />
           <video
             v-else
@@ -91,6 +107,7 @@
       <q-card-section class="row justify-center items-center q-ma-sm">
         <div class="absolute-left">
           <q-btn flat dense icon="auto_awesome_motion" @click="clickThumbnail" />
+          <q-btn flat dense icon="pageview" @click="clickNewTabPage" />
           <q-btn flat dense icon="download" @click="clickDownload" />
         </div>
         <div class="text-subtitle1 absolute-center">{{ currentIndex + 1 }} / {{ files.length }}</div>
@@ -194,20 +211,6 @@ export default {
       return url;
     },
 
-    clickInfo() {
-      this.showInfo = !this.showInfo;
-      this.currentSize = '';
-      if (this.files[this.currentIndex].type === 'audio') {
-        const video = document.getElementById('video');
-        this.currentSize = `${video.videoWidth} × ${video.videoHeight}`;
-      } else {
-        const image = document.getElementById('image');
-        this.currentSize = `${image.naturalWidth} × ${image.naturalHeight}`;
-        console.log(image);
-      }
-      console.log(this.currentSize);
-    },
-
     clickPrevious() {
       if (this.currentIndex > 0) {
         this.currentIndex--;
@@ -224,6 +227,14 @@ export default {
           this.scrollToThumbnail(this.currentIndex);
         }
       }
+    },
+
+    clickNewTabPage() {
+      const file = this.files[this.currentIndex];
+      const link = document.createElement('a');
+      link.target = 'blank';
+      link.href = this.getMediaUrl(file);
+      link.click();
     },
 
     clickDownload() {
