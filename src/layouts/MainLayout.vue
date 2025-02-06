@@ -215,8 +215,9 @@ export default {
 
     "$route.query.keyword": {
       handler: function (keywords) {
-        this.keywords = keywords ? keywords.split(" ") : [];
+        this.keywords = keywords ? keywords.split(";") : [];
       },
+      immediate: true
     }
   },
 
@@ -247,11 +248,7 @@ export default {
 
     initKeyword() {
       if (this.$route.query.keyword) {
-        for (let kw of this.$route.query.keyword.split(" ")) {
-          if (!this.keywords.includes(kw)) {
-            this.keywords.push(kw);
-          }
-        }
+        this.keywords = this.$route.query.keyword.split(";");
       }
     },
 
@@ -401,13 +398,13 @@ export default {
       }
       this.keywords.push(keyword);
       this.editKeyword = "";
-      this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } })
+      this.$router.push({ "name": "works", query: { keyword: this.keywords.join(";") } })
     },
 
     onRemoveSearchKeyword(index) {
       this.keywords.splice(index, 1);
       if (this.keywords.length) {
-        this.$router.push({ "name": "works", query: { keyword: this.keywords.join(" ") } })
+        this.$router.push({ "name": "works", query: { keyword: this.keywords.join(";") } })
       } else {
         this.$router.push("/");
       }

@@ -3,7 +3,7 @@
     <q-toolbar>
       <q-toolbar-title>通用设置</q-toolbar-title>
     </q-toolbar>
-    <q-card class="q-py-sm">
+    <q-card class="q-py-none">
       <q-list separator>
         <!-- 倒带跳跃秒数设置 -->
         <q-item>
@@ -23,9 +23,9 @@
 
 
     <q-toolbar>
-      <q-toolbar-title>播放器设置</q-toolbar-title>
+      <q-toolbar-title>播放设置</q-toolbar-title>
     </q-toolbar>
-    <q-card class="q-py-sm">
+    <q-card class="q-py-none">
       <q-list separator>
         <!-- 倒带跳跃秒数设置 -->
         <q-item>
@@ -50,6 +50,16 @@
           <q-item-section side>
             <q-select borderless v-model="forwardSeekTimeOption" :options="seekTimeOptions"
               @input="setForwardSeekTime" />
+          </q-item-section>
+        </q-item><q-item>
+          <q-item-section avatar>
+            <q-icon flat dense size="md" name="fast_forward" />
+          </q-item-section>
+          <q-item-section main>
+            <q-item-label>是否启用图片/视频查看器</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-toggle borderless v-model="isViewer" @input="setIsViewer" />
           </q-item-section>
         </q-item>
       </q-list>
@@ -80,7 +90,9 @@ export default {
         { label: "5 秒", value: 5 },
         { label: "10 秒", value: 10 },
         { label: "30 秒", value: 30 }
-      ]
+      ],
+      // 媒体查看器是否启用
+      isViewer: true
     };
   },
 
@@ -97,6 +109,9 @@ export default {
       const forwardSeekTime = this.$q.localStorage.getItem("forwardSeekTime");
       this.forwardSeekTimeOption = this.seekTimeOptions.find((item) => item.value === forwardSeekTime);
       this.SET_FORWARD_SEEK_TIME(forwardSeekTime);
+    }
+    if (this.$q.localStorage.has('isViewer')) {
+      this.isViewer = this.$q.localStorage.getItem('isViewer');
     }
   },
 
@@ -126,9 +141,10 @@ export default {
       this.$q.localStorage.set("forwardSeekTime", newForwardSeekTimeOption.value)
     },
 
-    setArrowLeftKey(newLeftArrowKey) {
-      console.log("set left arrow key:", newLeftArrowKey.label);
-      this.$q.localStorage.set("arrowLeftKey", newLeftArrowKey.value);
+    setIsViewer(newIsViewer) {
+      console.log("set Media Viewer:", newIsViewer);
+      this.isViewer = newIsViewer
+      this.$q.localStorage.set("isViewer", this.isViewer);
     },
   }
 };

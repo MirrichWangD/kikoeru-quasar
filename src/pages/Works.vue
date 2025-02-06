@@ -150,25 +150,7 @@ export default {
   },
 
   created() {
-    if (this.$q.localStorage.has('pageSize')) {
-      this.pageSize = this.$q.localStorage.getItem('pageSize');
-    }
-    this.reset();
-  },
-
-  mounted() {
-    if (this.$q.localStorage.has('pageSize')) {
-      this.pageSize = this.$q.localStorage.getItem('pageSize');
-    }
-    if (this.$q.localStorage.has('sortOption')) {
-      this.sortOption = this.$q.localStorage.getItem('sortOption');
-    }
-    if (this.$q.localStorage.has('showMode')) {
-      this.showMode = this.$q.localStorage.getItem('showMode');
-    }
-    if (this.$q.localStorage.has('keywords')) {
-      this.keywords = localStorage.keywords ? localStorage.keywords.split(' ') : [];
-    }
+    this.init();
   },
 
   computed: {
@@ -184,56 +166,45 @@ export default {
 
   watch: {
     sortOption(newSortOptionSetting) {
-      const localSortOption = this.$q.localStorage.getItem('sortOption') || {};
-      if (localSortOption.label !== newSortOptionSetting.label) {
-        this.$q.localStorage.set('sortOption', newSortOptionSetting);
-        this.reset();
-      }
+      this.$q.localStorage.set('sortOption', newSortOptionSetting);
+      this.reset();
     },
 
     showMode(newShowModeSetting) {
       this.$q.localStorage.set('showMode', newShowModeSetting);
     },
 
-    $route(to) {
-      const query = this.$route.query;
-      // 处理分页，假如跳转至`/work/RJxxx`或`/`则为NaN
-      const queryPage = parseInt(query.page);
-      // 处理关键字
-      this.keywords = query.keyword ? query.keyword.split(' ') : [];
-      // 前往/works路由
-      if (to.name === 'works') {
-        // 其他页面单击"kikoeru"返回主页时重新请求数据，在第一页单击不需要重新请求数据
-        if (isNaN(queryPage) & (this.page !== 1) || localStorage.keywords !== this.keywords.join(' ')) {
-          localStorage.keywords = this.keywords;
-          this.reset();
+    "$route.query": {
+      handler: function (query) {
+        if (this.$route.path === "/works") {
+          const keyword = query.keyword ? query.keyword : '';
+          if (keyword !== this.keywords.join(';')) {
+            this.keywords = keyword ? keyword.split(";") : [];
+            this.reset();
+          }
         }
       }
     }
   },
 
   methods: {
-    onLyricStatusChange(newLyricStatus) {
-      console.log('switch lyric status:', newLyricStatus);
-      this.lyricStatus = newLyricStatus;
-      const query = { ...this.$route.query, page: 1 };
-      if (Object.keys(query).length !== Object.keys(this.$route.query).length || this.$route.query.page !== 1) {
-        this.$router.push({ query: query }).catch(err => {
-          console.error(err);
-        });
+    init() {
+      if (this.$route.query.keyword) {
+        this.keywords = this.$route.query.keyword.split(";");
       }
-      this.reset();
-    },
-
-    onPageChange(page) {
-      console.log(`change page to: ${page}`);
-      this.$router.push({ query: { ...this.$route.query, page: page } });
-      this.page = page;
-      this.reset();
+      if (this.$q.localStorage.has('showMode')) {
+        this.showMode = this.$q.localStorage.getItem('showMode');
+      }
+      if (this.$q.localStorage.has('sortOption')) {
+        this.sortOption = this.$q.localStorage.getItem('sortOption');
+      }
+      if (this.$q.localStorage.has('pageSize')) {
+        this.pageSize = this.$q.localStorage.getItem('pageSize');
+      }
     },
 
     requestWorksQueue() {
-      console.log(`requestWorksQueue seed: ${this.seed}`);
+      console.log(`requestWorksQueue: ${this.seed}`);
       this.works = [];
       this.totalCount = 0;
       const params = {
@@ -246,7 +217,7 @@ export default {
       };
 
       if (this.$route.query.keyword) {
-        params.keywords = this.$route.query.keyword.split(' ');
+        params.keywords = this.$route.query.keyword.split(';');
       }
 
       return this.$axios
@@ -287,11 +258,37 @@ export default {
         this.stopLoad = true;
       });
     },
+    
+    onLyricStatusChange(newLyricStatus) {
+      console.log('switch lyric status:', newLyricStatus);
+      this.lyricStatus = newLyricStatus;
+      this.page = 1;
+      const query = {};
+      if (this.$route.query) {
+        if (this.$route.query.keyword) {
+          query.keyword = this.$route.query.keyword;
+        } 
+        if (this.$route.query.page) {
+          this.$router.push({ query: query });
+        }
+      }
+      if (this.$route.query.page === undefined) {
+        this.reset();
+      }
+    },
+
+    onPageChange(page) {
+      console.log(`change page to: ${page}`);
+      this.$router.push({ query: { ...this.$route.query, page: page } });
+      this.page = page;
+      this.reset();
+    }, 
 
     // 搜索功能
     onRemoveSearchKeyword(index) {
-      this.keywords.splice(index, 1);
-      const query = this.keywords.length ? { keyword: this.keywords.join(' ') } : {};
+      const keyword = this.$route.query.keyword.split(";");
+      keyword.splice(index, 1);
+      const query = keyword.length ? { keyword: keyword.join(';') } : {};
       this.$router.push({ name: 'works', query: query });
     }
   }

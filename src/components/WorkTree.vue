@@ -111,6 +111,7 @@ export default {
     return {
       path: [],
       showViewer: false,
+      isViewer: true,
       viewerFiles: [],
       viewerFileIndex: 0,
       stopLoad: false
@@ -127,6 +128,12 @@ export default {
   watch: {
     tree() {
       this.initPath();
+    }
+  },
+
+  created() {
+    if (this.$q.localStorage.has('isViewer')) {
+      this.isViewer = this.$q.localStorage.getItem('isViewer');
     }
   },
 
@@ -186,7 +193,11 @@ export default {
       } else if (item.type === 'text') {
         this.openFile(item);
       } else if (item.type === 'image' || ['mp4', 'mkv'].includes(ext)) {
-        this.openViewer(item);
+        if (this.$q.localStorage.getItem('isViewer')) {
+          this.openViewer(item);
+        } else {
+          this.openFile(item);
+        }
       } else if (item.type === 'other') {
         this.openFile(item, true);
       } else if (this.currentPlayingFile.hash !== item.hash) {
@@ -241,17 +252,12 @@ export default {
     },
 
     getMediaUrl(file, isDownload = false) {
-      const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
       let url;
       if (isDownload === true) {
-        url = file.mediaDownloadUrl
-          ? `${file.mediaDownloadUrl}?token=${token}`
-          : `/api/media/download/${file.hash}?token=${token}`;
+        url = file.mediaDownloadUrl ? file.mediaDownloadUrl : `/api/media/download/${file.hash}`;
       } else {
-        url = file.mediaStreamUrl
-          ? `${file.mediaStreamUrl}?token=${token}`
-          : `/api/media/stream/${file.hash}?token=${token}`;
+        url = file.mediaStreamUrl ? file.mediaStreamUrl : `/api/media/stream/${file.hash}`;
       }
       return url;
     },

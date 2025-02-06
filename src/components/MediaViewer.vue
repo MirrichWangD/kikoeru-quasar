@@ -196,17 +196,12 @@ export default {
     },
 
     getMediaUrl(file, isDownload = false) {
-      const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
       let url;
       if (isDownload === true) {
-        url = file.mediaDownloadUrl
-          ? `${file.mediaDownloadUrl}?token=${token}`
-          : `/api/media/download/${file.hash}?token=${token}`;
+        url = file.mediaDownloadUrl ? file.mediaDownloadUrl : `/api/media/download/${file.hash}`;
       } else {
-        url = file.mediaStreamUrl
-          ? `${file.mediaStreamUrl}?token=${token}`
-          : `/api/media/stream/${file.hash}?token=${token}`;
+        url = file.mediaStreamUrl ? file.mediaStreamUrl : `/api/media/stream/${file.hash}`;
       }
       return url;
     },
@@ -232,8 +227,8 @@ export default {
     clickNewTabPage() {
       const file = this.files[this.currentIndex];
       const link = document.createElement('a');
-      link.target = 'blank';
       link.href = this.getMediaUrl(file);
+      link.target = '_blank';
       link.click();
     },
 
