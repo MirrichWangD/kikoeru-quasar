@@ -167,9 +167,7 @@ export default {
 
   watch: {
     sortOption(newSortOption) {
-      let localSortOption = this.$q.localStorage.has('sortOption')
-        ? this.$q.localStorage.getItem('sortOption')
-        : this.sortOption;
+      const localSortOption = this.$q.localStorage.getItem('sortOption') || { label: '最新收录' };
       if (newSortOption.label !== localSortOption.label) {
         this.$q.localStorage.set('sortOption', newSortOption);
         this.reset();
