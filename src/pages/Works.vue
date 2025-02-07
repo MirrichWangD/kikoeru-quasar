@@ -169,7 +169,7 @@ export default {
     sortOption(newSortOption) {
       let localSortOption = this.$q.localStorage.has('sortOption')
         ? this.$q.localStorage.getItem('sortOption')
-        : this.sortOPtion;
+        : this.sortOption;
       if (newSortOption.label !== localSortOption.label) {
         this.$q.localStorage.set('sortOption', newSortOption);
         this.reset();
