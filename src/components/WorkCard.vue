@@ -25,18 +25,29 @@
       <div v-show="metadata.title" class="row items-center">
         <!-- 评价 -->
         <div class="col-auto q-ml-sm">
-          <q-rating v-model="rating" size="sm" :color="userMarked ? 'blue' : 'amber'" icon="star_border"
-            icon-selected="star" icon-half="star_half" />
+          <q-rating
+            v-model="rating"
+            size="sm"
+            :color="userMarked ? 'blue' : 'amber'"
+            icon="star_border"
+            icon-selected="star"
+            icon-half="star_half"
+          />
 
           <!-- 评价分布明细 -->
-          <q-tooltip v-if=metadata.rate_count_detail content-class="text-subtitle1">
+          <q-tooltip v-if="metadata.rate_count_detail" content-class="text-subtitle1">
             <div>平均: {{ metadata.rate_average_2dp }}</div>
-            <div v-for="(rate, index) in sortedRatings" :key=index class="row items-center">
+            <div v-for="(rate, index) in sortedRatings" :key="index" class="row items-center">
               <div class="col">{{ rate.review_point }}星</div>
 
               <!-- 评价占比 -->
-              <q-linear-progress :value="rate.ratio / 100" color="amber" track-color="white"
-                style="height: 15px; width: 100px" class="col-auto" />
+              <q-linear-progress
+                :value="rate.ratio / 100"
+                color="amber"
+                track-color="white"
+                style="height: 15px; width: 100px"
+                class="col-auto"
+              />
 
               <div class="col q-mx-xs">({{ rate.count }})</div>
             </div>
@@ -63,8 +74,13 @@
         <!-- DLsite链接 -->
         <div class="col-auto q-ml-xs">
           <q-icon name="launch" size="xs" />
-          <a class="text-blue" :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`"
-            rel="noreferrer noopener" target="_blank">DLsite</a>
+          <a
+            class="text-blue"
+            :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`"
+            rel="noreferrer noopener"
+            target="_blank"
+            >DLsite</a
+          >
         </div>
       </div>
 
@@ -72,15 +88,24 @@
       <div v-show="metadata.title">
         <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span>
         <span>售出数: {{ metadata.dl_count }}</span>
-        <q-chip v-if="!metadata.nsfw" dense square outline size="sm" class="q-py-sm text-green"
-          style="margin-top: 0px;">全年龄</q-chip>
-        <q-chip v-if="metadata.lyric_status" dense square outline size="sm" class="q-py-sm text-blue"
-          style="margin-top: 0px;">带字幕</q-chip>
+        <q-chip v-if="!metadata.nsfw" dense square outline size="sm" class="q-py-sm text-green" style="margin-top: 0px;"
+          >全年龄</q-chip
+        >
+        <q-chip
+          v-if="metadata.lyric_status"
+          dense
+          square
+          outline
+          size="sm"
+          class="q-py-sm text-blue"
+          style="margin-top: 0px;"
+          >带字幕</q-chip
+        >
       </div>
 
       <!-- 标签 -->
       <div class="q-ma-xs" v-if="showTags">
-        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key=index>
+        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index">
           <q-chip size="md" class="shadow-2" :class="{ 'bg-grey-9': $q.dark.isActive }">
             {{ tag.name }}
           </q-chip>
@@ -89,7 +114,7 @@
 
       <!-- 声优 -->
       <div class="q-mx-xs q-my-sm">
-        <router-link v-for="(va, index) in metadata.vas" :to="`/works?keyword=${va.name}`" :key=index>
+        <router-link v-for="(va, index) in metadata.vas" :to="`/works?keyword=${va.name}`" :key="index">
           <q-chip square size="md" class="shadow-2" color="teal" text-color="white">
             {{ va.name }}
           </q-chip>
@@ -101,8 +126,8 @@
 
 <script>
 // import WorkDetails from 'components/WorkDetails'
-import CoverSFW from 'components/CoverSFW'
-import NotifyMixin from '../mixins/Notification.js'
+import CoverSFW from 'components/CoverSFW';
+import NotifyMixin from '../mixins/Notification.js';
 
 export default {
   name: 'WorkCard',
@@ -129,13 +154,13 @@ export default {
       rating: 0,
       userMarked: false,
       showTags: true
-    }
+    };
   },
 
   computed: {
-    sortedRatings: function () {
+    sortedRatings: function() {
       function compare(a, b) {
-        return (a.review_point > b.review_point) ? -1 : 1;
+        return a.review_point > b.review_point ? -1 : 1;
       }
 
       return this.metadata.rate_count_detail.slice().sort(compare);
@@ -162,9 +187,9 @@ export default {
     rating(newRating, oldRating) {
       if (oldRating) {
         const submitPayload = {
-          'user_name': this.$store.state.User.name, // 用户名不会被后端使用
-          'work_id': this.metadata.id,
-          'rating': newRating
+          user_name: this.$store.state.User.name, // 用户名不会被后端使用
+          work_id: this.metadata.id,
+          rating: newRating
         };
         this.userMarked = true;
         this.submitRating(submitPayload);
@@ -174,37 +199,30 @@ export default {
 
   methods: {
     submitRating(payload) {
-      this.$axios.put('/api/review', payload)
-        .then((response) => {
-          this.showSuccNotif(response.data.message)
+      this.$axios
+        .put('/api/review', payload)
+        .then(response => {
+          this.showSuccNotif(response.data.message);
         })
-        .catch((error) => {
+        .catch(error => {
           if (error.response) {
             // 请求已发出，但服务器响应的状态码不在 2xx 范围内
-            this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
+            this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
           } else {
-            this.showErrNotif(error.message || error)
+            this.showErrNotif(error.message || error);
           }
-        })
+        });
     },
     formatSeconds(seconds) {
-      let h =
-        Math.floor(seconds / 3600) < 10
-          ? "0" + Math.floor(seconds / 3600)
-          : Math.floor(seconds / 3600);
+      let h = Math.floor(seconds / 3600) < 10 ? '0' + Math.floor(seconds / 3600) : Math.floor(seconds / 3600);
 
       let m =
-        Math.floor((seconds / 60) % 60) < 10
-          ? "0" + Math.floor((seconds / 60) % 60)
-          : Math.floor((seconds / 60) % 60);
+        Math.floor((seconds / 60) % 60) < 10 ? '0' + Math.floor((seconds / 60) % 60) : Math.floor((seconds / 60) % 60);
 
-      let s =
-        Math.floor(seconds % 60) < 10
-          ? "0" + Math.floor(seconds % 60)
-          : Math.floor(seconds % 60);
+      let s = Math.floor(seconds % 60) < 10 ? '0' + Math.floor(seconds % 60) : Math.floor(seconds % 60);
 
-      return h === "00" ? m + ":" + s : h + ":" + m + ":" + s;
+      return h === '00' ? m + ':' + s : h + ':' + m + ':' + s;
     }
   }
-}
+};
 </script>

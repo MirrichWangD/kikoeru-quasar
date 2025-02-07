@@ -174,12 +174,12 @@ export default {
       this.$q.localStorage.set('showMode', newShowModeSetting);
     },
 
-    "$route.query": {
-      handler: function (query) {
-        if (this.$route.path === "/works") {
+    '$route.query': {
+      handler: function(query) {
+        if (this.$route.path === '/works') {
           const keyword = query.keyword ? query.keyword : '';
           if (keyword !== this.keywords.join(';')) {
-            this.keywords = keyword ? keyword.split(";") : [];
+            this.keywords = keyword ? keyword.split(';') : [];
             this.reset();
           }
         }
@@ -190,7 +190,7 @@ export default {
   methods: {
     init() {
       if (this.$route.query.keyword) {
-        this.keywords = this.$route.query.keyword.split(";");
+        this.keywords = this.$route.query.keyword.split(';');
       }
       if (this.$q.localStorage.has('showMode')) {
         this.showMode = this.$q.localStorage.getItem('showMode');
@@ -258,7 +258,7 @@ export default {
         this.stopLoad = true;
       });
     },
-    
+
     onLyricStatusChange(newLyricStatus) {
       console.log('switch lyric status:', newLyricStatus);
       this.lyricStatus = newLyricStatus;
@@ -267,7 +267,7 @@ export default {
       if (this.$route.query) {
         if (this.$route.query.keyword) {
           query.keyword = this.$route.query.keyword;
-        } 
+        }
         if (this.$route.query.page) {
           this.$router.push({ query: query });
         }
@@ -282,11 +282,11 @@ export default {
       this.$router.push({ query: { ...this.$route.query, page: page } });
       this.page = page;
       this.reset();
-    }, 
+    },
 
     // 搜索功能
     onRemoveSearchKeyword(index) {
-      const keyword = this.$route.query.keyword.split(";");
+      const keyword = this.$route.query.keyword.split(';');
       keyword.splice(index, 1);
       const query = keyword.length ? { keyword: keyword.join(';') } : {};
       this.$router.push({ name: 'works', query: query });

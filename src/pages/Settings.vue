@@ -21,7 +21,6 @@
       </q-list>
     </q-card>
 
-
     <q-toolbar>
       <q-toolbar-title>播放设置</q-toolbar-title>
     </q-toolbar>
@@ -48,10 +47,14 @@
             <q-item-label>前进跳跃秒数</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-select borderless v-model="forwardSeekTimeOption" :options="seekTimeOptions"
-              @input="setForwardSeekTime" />
-          </q-item-section>
-        </q-item><q-item>
+            <q-select
+              borderless
+              v-model="forwardSeekTimeOption"
+              :options="seekTimeOptions"
+              @input="setForwardSeekTime"
+            />
+          </q-item-section> </q-item
+        ><q-item>
           <q-item-section avatar>
             <q-icon flat dense size="md" name="fast_forward" />
           </q-item-section>
@@ -70,11 +73,11 @@
 </template>
 
 <script>
-import NotifyMixin from '../mixins/Notification.js'
-import { mapMutations } from "vuex";
+import NotifyMixin from '../mixins/Notification.js';
+import { mapMutations } from 'vuex';
 
 export default {
-  name: "Settings",
+  name: 'Settings',
 
   mixins: [NotifyMixin],
 
@@ -84,12 +87,12 @@ export default {
       // 页面数量设置
       pageSize: 12,
       // 倒带、前进秒数设置
-      rewindSeekTimeOption: { label: "5 秒", value: 5 },
-      forwardSeekTimeOption: { label: "30 秒", value: 30 },
+      rewindSeekTimeOption: { label: '5 秒', value: 5 },
+      forwardSeekTimeOption: { label: '30 秒', value: 30 },
       seekTimeOptions: [
-        { label: "5 秒", value: 5 },
-        { label: "10 秒", value: 10 },
-        { label: "30 秒", value: 30 }
+        { label: '5 秒', value: 5 },
+        { label: '10 秒', value: 10 },
+        { label: '30 秒', value: 30 }
       ],
       // 媒体查看器是否启用
       isViewer: true
@@ -97,17 +100,17 @@ export default {
   },
 
   mounted() {
-    if (this.$q.localStorage.has("pageSize")) {
-      this.pageSize = this.$q.localStorage.getItem("pageSize");
+    if (this.$q.localStorage.has('pageSize')) {
+      this.pageSize = this.$q.localStorage.getItem('pageSize');
     }
-    if (this.$q.localStorage.has("rewindSeekTime")) {
-      const rewindSeekTime = this.$q.localStorage.getItem("rewindSeekTime")
-      this.rewindSeekTimeOption = this.seekTimeOptions.find((item) => item.value === rewindSeekTime);
+    if (this.$q.localStorage.has('rewindSeekTime')) {
+      const rewindSeekTime = this.$q.localStorage.getItem('rewindSeekTime');
+      this.rewindSeekTimeOption = this.seekTimeOptions.find(item => item.value === rewindSeekTime);
       this.SET_REWIND_SEEK_TIME(rewindSeekTime);
     }
-    if (this.$q.localStorage.has("forwardSeekTime")) {
-      const forwardSeekTime = this.$q.localStorage.getItem("forwardSeekTime");
-      this.forwardSeekTimeOption = this.seekTimeOptions.find((item) => item.value === forwardSeekTime);
+    if (this.$q.localStorage.has('forwardSeekTime')) {
+      const forwardSeekTime = this.$q.localStorage.getItem('forwardSeekTime');
+      this.forwardSeekTimeOption = this.seekTimeOptions.find(item => item.value === forwardSeekTime);
       this.SET_FORWARD_SEEK_TIME(forwardSeekTime);
     }
     if (this.$q.localStorage.has('isViewer')) {
@@ -116,42 +119,38 @@ export default {
   },
 
   methods: {
-    ...mapMutations("AudioPlayer", [
-      "SET_REWIND_SEEK_TIME",
-      "SET_FORWARD_SEEK_TIME"
-    ]),
+    ...mapMutations('AudioPlayer', ['SET_REWIND_SEEK_TIME', 'SET_FORWARD_SEEK_TIME']),
 
     setPageSize() {
-      console.log("set pageSize:", this.pageSize);
-      this.$q.localStorage.set("pageSize", parseInt(this.pageSize));
+      console.log('set pageSize:', this.pageSize);
+      this.$q.localStorage.set('pageSize', parseInt(this.pageSize));
       window.location.reload();
     },
 
     setRewindSeekTime(newRewindSeekTimeOption) {
-      console.log("set rewindSeekTime:", newRewindSeekTimeOption.value)
+      console.log('set rewindSeekTime:', newRewindSeekTimeOption.value);
       this.rewindSeekTimeOption = newRewindSeekTimeOption;
       this.SET_REWIND_SEEK_TIME(newRewindSeekTimeOption.value);
-      this.$q.localStorage.set("rewindSeekTime", newRewindSeekTimeOption.value)
+      this.$q.localStorage.set('rewindSeekTime', newRewindSeekTimeOption.value);
     },
 
     setForwardSeekTime(newForwardSeekTimeOption) {
-      console.log("set forwardSeekTime:", newForwardSeekTimeOption.value)
+      console.log('set forwardSeekTime:', newForwardSeekTimeOption.value);
       this.forwardSeekTimeOption = newForwardSeekTimeOption;
       this.SET_FORWARD_SEEK_TIME(newForwardSeekTimeOption.value);
-      this.$q.localStorage.set("forwardSeekTime", newForwardSeekTimeOption.value)
+      this.$q.localStorage.set('forwardSeekTime', newForwardSeekTimeOption.value);
     },
 
     setIsViewer(newIsViewer) {
-      console.log("set Media Viewer:", newIsViewer);
-      this.isViewer = newIsViewer
-      this.$q.localStorage.set("isViewer", this.isViewer);
-    },
+      console.log('set Media Viewer:', newIsViewer);
+      this.isViewer = newIsViewer;
+      this.$q.localStorage.set('isViewer', this.isViewer);
+    }
   }
 };
 </script>
 <style lang="scss">
 .player-settings {
-
   // 宽度 > $breakpoint-sm-min
   @media (min-width: $breakpoint-sm-min) {
     width: 330px;

@@ -1,7 +1,14 @@
 <template>
   <router-link :to="`/work/RJ${workid}`">
-    <q-img :src="coverUrl" :ratio="4 / 3" :img-class="imgClass" style="max-width: 560px;" transition="fade"
-      @mouseover="toggleBlurFlag()" @mouseout="toggleBlurFlag()">
+    <q-img
+      :src="coverUrl"
+      :ratio="4 / 3"
+      :img-class="imgClass"
+      style="max-width: 560px;"
+      transition="fade"
+      @mouseover="toggleBlurFlag()"
+      @mouseout="toggleBlurFlag()"
+    >
       <div class="absolute-top-left transparent" style="padding: 0;">
         <q-chip dense square color="brown" text-color="white" class="q-ma-sm">
           {{ `RJ${workid}` }}
@@ -38,25 +45,25 @@ export default {
   data() {
     return {
       blurFlag: true
-    }
+    };
   },
 
   computed: {
     coverUrl() {
-      return this.workid ? `/api/cover/${this.workid}` : ""
+      return this.workid ? `/api/cover/${this.workid}` : '';
     },
 
     imgClass() {
       if (this.$q.platform.is.mobile) {
         // 在移动设备上图片直接显示
-        return ""
+        return '';
       } else {
         if (!this.nsfw) {
           // 在PC上SFW的图片直接显示
-          return ""
+          return '';
         } else {
           // 在PC上NSFW的图片鼠标悬停显示
-          return this.blurFlag ? "blur-image" : ""
+          return this.blurFlag ? 'blur-image' : '';
         }
       }
     }
@@ -64,10 +71,10 @@ export default {
 
   methods: {
     toggleBlurFlag() {
-      this.blurFlag = !this.blurFlag
+      this.blurFlag = !this.blurFlag;
     }
   }
-}
+};
 </script>
 
 <style lang="scss">

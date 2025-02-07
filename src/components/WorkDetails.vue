@@ -8,8 +8,11 @@
       <div class="q-px-sm q-py-none">
         <!-- 标题 -->
         <div class="text-h6 text-weight-regular">
-          <h1 class="text-h6 text-weight-regular q-mb-none" style="overflow-wrap: break-word;"
-            :class="{ 'text-black': !$q.dark.isActive, 'text-white': $q.dark.isActive }">
+          <h1
+            class="text-h6 text-weight-regular q-mb-none"
+            style="overflow-wrap: break-word;"
+            :class="{ 'text-black': !$q.dark.isActive, 'text-white': $q.dark.isActive }"
+          >
             {{ metadata.title }}
           </h1>
         </div>
@@ -25,27 +28,40 @@
         <div class="row items-center q-gutter-xs">
           <!-- 评价 -->
           <div class="col-auto">
-            <q-rating v-model="rating" @input="setRating" name="rating" size="sm" :color="userMarked ? 'blue' : 'amber'"
-              icon="star_border" icon-selected="star" icon-half="star_half" />
+            <q-rating
+              v-model="rating"
+              @input="setRating"
+              name="rating"
+              size="sm"
+              :color="userMarked ? 'blue' : 'amber'"
+              icon="star_border"
+              icon-selected="star"
+              icon-half="star_half"
+            />
 
             <!-- 评价分布明细 -->
-            <q-tooltip v-if=metadata.rate_count_detail content-class="text-subtitle1">
+            <q-tooltip v-if="metadata.rate_count_detail" content-class="text-subtitle1">
               <div>平均: {{ metadata.rate_average_2dp }}</div>
-              <div v-for="(rate, index) in sortedRatings" :key=index class="row items-center">
-                <div class="col"> {{ rate.review_point }}星 </div>
+              <div v-for="(rate, index) in sortedRatings" :key="index" class="row items-center">
+                <div class="col">{{ rate.review_point }}星</div>
 
                 <!-- 评价占比 -->
-                <q-linear-progress :value="rate.ratio / 100" color="amber" track-color="white"
-                  style="height: 15px; width: 100px" class="col-auto" />
+                <q-linear-progress
+                  :value="rate.ratio / 100"
+                  color="amber"
+                  track-color="white"
+                  style="height: 15px; width: 100px"
+                  class="col-auto"
+                />
 
-                <div class="col q-mx-sm"> ({{ rate.count }}) </div>
+                <div class="col q-mx-sm">({{ rate.count }})</div>
               </div>
             </q-tooltip>
           </div>
 
           <div class="col-auto">
-            <span class="text-weight-medium text-body1 text-red">{{ metadata.rate_average_2dp }}</span> <span
-              class="text-grey"> ({{ metadata.rate_count }})</span>
+            <span class="text-weight-medium text-body1 text-red">{{ metadata.rate_average_2dp }}</span>
+            <span class="text-grey"> ({{ metadata.rate_count }})</span>
           </div>
 
           <!-- 评论数量 -->
@@ -61,22 +77,26 @@
 
           <!-- DLsite链接 -->
           <div class="col-auto">
-            <q-icon name="launch" size="xs" /><a class="text-blue"
-              :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`" rel="noreferrer noopener"
-              target="_blank">DLsite</a>
+            <q-icon name="launch" size="xs" /><a
+              class="text-blue"
+              :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`"
+              rel="noreferrer noopener"
+              target="_blank"
+              >DLsite</a
+            >
           </div>
         </div>
       </div>
 
       <!-- 价格&售出数 -->
       <div class="q-pt-sm q-pb-none">
-        <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span> 售出数: {{
-          metadata.dl_count }}
+        <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span> 售出数:
+        {{ metadata.dl_count }}
       </div>
 
       <!-- 标签 -->
       <div class="q-px-none q-py-sm" v-if="showTags">
-        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key=index>
+        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index">
           <q-chip size="md" class="shadow-4" :class="{ 'bg-grey-9': $q.dark.isActive }">
             {{ tag.name }}
           </q-chip>
@@ -85,7 +105,7 @@
 
       <!-- 声优 -->
       <div class="q-px-none q-pt-sm q-py-sm">
-        <router-link v-for="(va, index) in metadata.vas" :to="`/works?keyword=${va.name}`" :key=index>
+        <router-link v-for="(va, index) in metadata.vas" :to="`/works?keyword=${va.name}`" :key="index">
           <q-chip square size="md" class="shadow-4" color="teal" text-color="white">
             {{ va.name }}
           </q-chip>
@@ -147,9 +167,9 @@
 </template>
 
 <script>
-import CoverSFW from 'components/CoverSFW'
-import WriteReview from './WriteReview'
-import NotifyMixin from '../mixins/Notification.js'
+import CoverSFW from 'components/CoverSFW';
+import WriteReview from './WriteReview';
+import NotifyMixin from '../mixins/Notification.js';
 
 export default {
   name: 'WorkDetails',
@@ -175,13 +195,13 @@ export default {
       progress: '',
       showReviewDialog: false,
       showTags: true
-    }
+    };
   },
 
   computed: {
-    sortedRatings: function () {
+    sortedRatings: function() {
       function compare(a, b) {
-        return (a.review_point > b.review_point) ? -1 : 1;
+        return a.review_point > b.review_point ? -1 : 1;
       }
       return this.metadata.rate_count_detail.slice().sort(compare);
     }
@@ -203,16 +223,16 @@ export default {
       if (newMetaData.tags && newMetaData.tags[0].name === null) {
         this.showTags = false;
       }
-    },
+    }
   },
 
   methods: {
     setProgress(newProgress) {
       this.progress = newProgress;
       const submitPayload = {
-        'user_name': this.$store.state.User.name, // 用户名不会被后端使用
-        'work_id': this.metadata.id,
-        'progress': newProgress
+        user_name: this.$store.state.User.name, // 用户名不会被后端使用
+        work_id: this.metadata.id,
+        progress: newProgress
       };
       this.submitProgress(submitPayload);
     },
@@ -221,45 +241,47 @@ export default {
       const params = {
         starOnly: false,
         progressOnly: true
-      }
-      this.$axios.put('/api/review', payload, { params })
-        .then((response) => {
+      };
+      this.$axios
+        .put('/api/review', payload, { params })
+        .then(response => {
           this.showSuccNotif(response.data.message);
           this.$emit('reset');
         })
-        .catch((error) => {
+        .catch(error => {
           if (error.response) {
             // 请求已发出，但服务器响应的状态码不在 2xx 范围内
-            this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
+            this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
           } else {
-            this.showErrNotif(error.message || error)
+            this.showErrNotif(error.message || error);
           }
-        })
+        });
     },
 
     setRating(newRating) {
       const submitPayload = {
-        'user_name': this.$store.state.User.name, // 用户名不会被后端使用
-        'work_id': this.metadata.id,
-        'rating': newRating
+        user_name: this.$store.state.User.name, // 用户名不会被后端使用
+        work_id: this.metadata.id,
+        rating: newRating
       };
       this.submitRating(submitPayload);
     },
 
     submitRating(payload) {
-      this.$axios.put('/api/review', payload)
-        .then((response) => {
+      this.$axios
+        .put('/api/review', payload)
+        .then(response => {
           this.showSuccNotif(response.data.message);
           this.$emit('reset');
         })
-        .catch((error) => {
+        .catch(error => {
           if (error.response) {
             // 请求已发出，但服务器响应的状态码不在 2xx 范围内
-            this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
+            this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`);
           } else {
-            this.showErrNotif(error.message || error)
+            this.showErrNotif(error.message || error);
           }
-        })
+        });
     },
 
     processReview() {
@@ -267,20 +289,15 @@ export default {
     },
 
     formatSeconds(seconds) {
-      let h = Math.floor(seconds / 3600) < 10
-        ? "0" + Math.floor(seconds / 3600)
-        : Math.floor(seconds / 3600);
+      let h = Math.floor(seconds / 3600) < 10 ? '0' + Math.floor(seconds / 3600) : Math.floor(seconds / 3600);
 
-      let m = Math.floor((seconds / 60) % 60) < 10
-        ? "0" + Math.floor((seconds / 60) % 60)
-        : Math.floor((seconds / 60) % 60);
+      let m =
+        Math.floor((seconds / 60) % 60) < 10 ? '0' + Math.floor((seconds / 60) % 60) : Math.floor((seconds / 60) % 60);
 
-      let s = Math.floor(seconds % 60) < 10
-        ? "0" + Math.floor(seconds % 60)
-        : Math.floor(seconds % 60);
+      let s = Math.floor(seconds % 60) < 10 ? '0' + Math.floor(seconds % 60) : Math.floor(seconds % 60);
 
-      return h === "00" ? m + ":" + s : h + ":" + m + ":" + s;
-    },
+      return h === '00' ? m + ':' + s : h + ':' + m + ':' + s;
+    }
   }
-}
+};
 </script>
