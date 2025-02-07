@@ -96,11 +96,19 @@
 
       <!-- 标签 -->
       <div class="q-px-none q-py-sm" v-if="showTags">
-        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index">
-          <q-chip size="md" class="shadow-4" :class="{ 'bg-grey-9': $q.dark.isActive }">
-            {{ tag.name }}
-          </q-chip>
-        </router-link>
+        <!-- <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index"> -->
+        <q-chip
+          v-for="(tag, index) in metadata.tags"
+          :key="index"
+          size="md"
+          @click.native="toTagSearch(tag.name)"
+          class="shadow-4"
+          :class="{ 'bg-grey-9': $q.dark.isActive }"
+          style="cursor: pointer;"
+        >
+          {{ tag.name }}
+        </q-chip>
+        <!-- </router-link> -->
       </div>
 
       <!-- 声优 -->
@@ -288,16 +296,25 @@ export default {
       this.showReviewDialog = false;
     },
 
+    toTagSearch(tagName) {
+      if (tagName !== this.$q.localStorage.getItem('keywords').join(';')) {
+        this.$router.push({ name: 'works', query: { keyword: tagName } });
+      }
+    },
+
     formatSeconds(seconds) {
-      let h = Math.floor(seconds / 3600) < 10 ? '0' + Math.floor(seconds / 3600) : Math.floor(seconds / 3600);
-
-      let m =
-        Math.floor((seconds / 60) % 60) < 10 ? '0' + Math.floor((seconds / 60) % 60) : Math.floor((seconds / 60) % 60);
-
-      let s = Math.floor(seconds % 60) < 10 ? '0' + Math.floor(seconds % 60) : Math.floor(seconds % 60);
+      let h = `${Math.floor(seconds / 3600)}`.padStart(2, '0');
+      let m = `${Math.floor((seconds / 60) % 60)}`.padStart(2, '0');
+      let s = `${Math.floor(seconds % 60)}`.padStart(2, '0');
 
       return h === '00' ? m + ':' + s : h + ':' + m + ':' + s;
     }
   }
 };
 </script>
+<style scoped>
+/* optional: 添加一些样式，让它看起来更像按钮 */
+.q-chip {
+  cursor: pointer; /* 确保有点击效果 */
+}
+</style>

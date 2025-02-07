@@ -53,13 +53,15 @@
               :options="seekTimeOptions"
               @input="setForwardSeekTime"
             />
-          </q-item-section> </q-item
-        ><q-item>
+          </q-item-section>
+        </q-item>
+        <q-item>
           <q-item-section avatar>
-            <q-icon flat dense size="md" name="fast_forward" />
+            <q-icon flat dense size="md" name="image_search" />
           </q-item-section>
           <q-item-section main>
-            <q-item-label>是否启用图片/视频查看器</q-item-label>
+            <q-item-label>是否启用媒体查看器</q-item-label>
+            <q-item-label class="text-caption text-grey">开启可能占用性能，仅查看图片/视频</q-item-label>
           </q-item-section>
           <q-item-section side>
             <q-toggle borderless v-model="isViewer" @input="setIsViewer" />

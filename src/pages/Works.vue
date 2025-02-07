@@ -151,6 +151,7 @@ export default {
 
   created() {
     this.init();
+    this.reset();
   },
 
   computed: {
@@ -165,23 +166,30 @@ export default {
   },
 
   watch: {
-    sortOption(newSortOptionSetting) {
-      this.$q.localStorage.set('sortOption', newSortOptionSetting);
-      this.reset();
+    sortOption(newSortOption) {
+      let localSortOption = this.$q.localStorage.has('sortOption')
+        ? this.$q.localStorage.getItem('sortOption')
+        : this.sortOPtion;
+      if (newSortOption.label !== localSortOption.label) {
+        this.$q.localStorage.set('sortOption', newSortOption);
+        this.reset();
+      }
     },
 
     showMode(newShowModeSetting) {
       this.$q.localStorage.set('showMode', newShowModeSetting);
     },
 
+    keywords(newKeywords) {
+      this.$q.localStorage.set('keywords', newKeywords);
+    },
+
     '$route.query': {
       handler: function(query) {
-        if (this.$route.path === '/works') {
-          const keyword = query.keyword ? query.keyword : '';
-          if (keyword !== this.keywords.join(';')) {
-            this.keywords = keyword ? keyword.split(';') : [];
-            this.reset();
-          }
+        const keyword = query.keyword ? query.keyword : '';
+        if (this.$route.path === '/works' && keyword !== this.keywords.join(';')) {
+          this.keywords = keyword !== '' ? keyword.split(';') : [];
+          this.reset();
         }
       }
     }
