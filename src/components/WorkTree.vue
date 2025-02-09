@@ -190,14 +190,8 @@ export default {
       const ext = this.getFileExt(item.title);
       if (item.type === 'folder') {
         this.path.push(item.title);
-      } else if (item.type === 'text') {
+      } else if (['text', 'image'].includes(item.type) || ['mp4', 'mkv'].includes(ext)) {
         this.openFile(item);
-      } else if (item.type === 'image' || ['mp4', 'mkv'].includes(ext)) {
-        if (this.$q.localStorage.getItem('isViewer')) {
-          this.openViewer(item);
-        } else {
-          this.openFile(item);
-        }
       } else if (item.type === 'other') {
         this.openFile(item, true);
       } else if (this.currentPlayingFile.hash !== item.hash) {
@@ -213,7 +207,7 @@ export default {
       const nextFileIndex = this.queue.findIndex(file => file.hash === hash);
       const nextFile = this.queue[nextFileIndex];
       const ext = this.getFileExt(nextFile.title);
-      if (ext !== 'mp4') {
+      if (!['mp4', 'mkv'].includes(ext)) {
         if (this.currentPlayingFile.hash === hash) {
           this.$store.commit('AudioPlayer/TOGGLE_PLAYING');
         } else {
@@ -224,7 +218,7 @@ export default {
           });
         }
       } else {
-        this.openViewer(nextFile, ext);
+        this.openFile(nextFile);
       }
     },
 
@@ -237,10 +231,14 @@ export default {
     },
 
     openFile(file, isDownload = false) {
-      const link = document.createElement('a');
-      link.href = this.getMediaUrl(file, isDownload);
-      link.target = '_blank';
-      link.click();
+      if (this.isViewer) {
+        this.openViewer(file);
+      } else {
+        const link = document.createElement('a');
+        link.href = this.getMediaUrl(file, isDownload);
+        link.target = '_blank';
+        link.click();
+      }
     },
     // 图片&视频查看器
     openViewer(file) {
