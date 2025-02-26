@@ -289,8 +289,11 @@ export default {
     ...mapMutations('AudioPlayer', ['SET_REWIND_SEEK_TIME', 'SET_FORWARD_SEEK_TIME']),
 
     initKeyword() {
-      if (this.$q.localStorage.has('keywords')) {
-        this.keywords = this.$q.localStorage.getItem('keywords');
+      if (this.$q.sessionStorage.has('keyword')) {
+        this.keywords = this.$q.sessionStorage.getItem('keyword');
+      }
+      if (this.$route.query.keyword) {
+        this.keywords = this.$route.query.keyword.split(";")
       }
     },
 
@@ -470,7 +473,7 @@ export default {
 
     index() {
       this.keywords = [];
-      this.$q.localStorage.set('keywords', this.keywords);
+      this.$q.sessionStorage.set('keyword', this.keywords);
     },
 
     back() {

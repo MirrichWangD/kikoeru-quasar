@@ -79,8 +79,9 @@
             :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`"
             rel="noreferrer noopener"
             target="_blank"
-            >DLsite</a
           >
+            DLsite
+          </a>
         </div>
       </div>
 
@@ -88,9 +89,17 @@
       <div v-show="metadata.title">
         <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span>
         <span>售出数: {{ metadata.dl_count }}</span>
-        <q-chip v-if="!metadata.nsfw" dense square outline size="sm" class="q-py-sm text-green" style="margin-top: 0px;"
-          >全年龄</q-chip
+        <q-chip
+          v-if="!metadata.nsfw"
+          dense
+          square
+          outline
+          size="sm"
+          class="q-py-sm text-green"
+          style="margin-top: 0px;"
         >
+          全年龄
+        </q-chip>
         <q-chip
           v-if="metadata.lyric_status"
           dense
@@ -99,17 +108,25 @@
           size="sm"
           class="q-py-sm text-blue"
           style="margin-top: 0px;"
-          >带字幕</q-chip
         >
+          带字幕
+        </q-chip>
       </div>
 
       <!-- 标签 -->
       <div class="q-ma-xs" v-if="showTags">
-        <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index">
-          <q-chip size="md" class="shadow-2" :class="{ 'bg-grey-9': $q.dark.isActive }">
-            {{ tag.name }}
-          </q-chip>
-        </router-link>
+        <!-- <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index"> -->
+        <q-chip
+          v-for="(tag, index) in metadata.tags"
+          :key="index"
+          size="md"
+          class="shadow-2 cursor-pointer"
+          :class="{ 'bg-grey-9': $q.dark.isActive }"
+          @click.native="toTagSearch(tag.name)"
+        >
+          {{ tag.name }}
+        </q-chip>
+        <!-- </router-link> -->
       </div>
 
       <!-- 声优 -->
@@ -213,8 +230,14 @@ export default {
           }
         });
     },
+    toTagSearch(tagName) {
+      console.log('tag', this.$q.sessionStorage.getItem('keyword'));
+      if (tagName !== this.$q.sessionStorage.getItem('keyword').join(';')) {
+        this.$router.push({ name: 'works', query: { keyword: tagName } });
+      }
+    },
     formatSeconds(seconds) {
-      return (seconds / 3600) < 0 ? `${Math.floor(seconds / 60)}m` : `${(seconds / 3600).toFixed(1)}h`;
+      return seconds / 3600 < 0 ? `${Math.floor(seconds / 60)}m` : `${(seconds / 3600).toFixed(1)}h`;
     }
   }
 };

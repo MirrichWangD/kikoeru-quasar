@@ -19,9 +19,14 @@
 
         <!-- 社团名 -->
         <div class="text-subtitle1 text-weight-regular">
-          <router-link :to="`/works?keyword=${metadata.circle.name}`" class="text-grey">
+          <!-- <router-link :to="`/works?keyword=${metadata.circle.name}`" class="text-grey">
             {{ metadata.circle.name }}
-          </router-link>
+          </router-link> -->
+          <div class="text-subtitle1 text-weight-regular">
+            <span class="text-grey cursor-pointer" @click="toTagSearch(metadata.circle.name)">
+              {{ metadata.circle.name }}
+            </span>
+          </div>
         </div>
 
         <!-- 评价&评论 -->
@@ -61,42 +66,45 @@
 
           <div class="col-auto">
             <span class="text-weight-medium text-body1 text-red">{{ metadata.rate_average_2dp }}</span>
-            <span class="text-grey"> ({{ metadata.rate_count }})</span>
+            <span class="text-grey">({{ metadata.rate_count }})</span>
           </div>
 
           <!-- 评论数量 -->
           <div class="col-auto q-pl-sm">
-            <q-icon name="chat" size="xs" /> <span class="text-grey"> ({{ metadata.review_count }})</span>
+            <q-icon name="chat" size="xs" />
+            <span class="text-grey">({{ metadata.review_count }})</span>
           </div>
 
           <!-- 作品时长 -->
           <div class="col-auto q-pl-sm">
             <q-icon name="schedule" size="xs" />
-            <span class="text-grey"> ({{ formatSeconds(metadata.duration) }})</span>
+            <span class="text-grey">({{ formatSeconds(metadata.duration) }})</span>
           </div>
 
           <!-- DLsite链接 -->
           <div class="col-auto">
-            <q-icon name="launch" size="xs" /><a
+            <q-icon name="launch" size="xs" />
+            <a
               class="text-blue"
               :href="`https://www.dlsite.com/home/work/=/product_id/RJ${metadata.id}.html`"
               rel="noreferrer noopener"
               target="_blank"
-              >DLsite</a
             >
+              DLsite
+            </a>
           </div>
         </div>
       </div>
 
       <!-- 价格&售出数 -->
       <div class="q-pt-sm q-pb-none">
-        <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span> 售出数:
+        <span class="q-mx-sm text-weight-medium text-h6 text-red">{{ metadata.price }} 円</span>
+        售出数:
         {{ metadata.dl_count }}
       </div>
 
       <!-- 标签 -->
       <div class="q-px-none q-py-sm" v-if="showTags">
-        <!-- <router-link v-for="(tag, index) in metadata.tags" :to="`/works?keyword=${tag.name}`" :key="index"> -->
         <q-chip
           v-for="(tag, index) in metadata.tags"
           :key="index"
@@ -108,16 +116,23 @@
         >
           {{ tag.name }}
         </q-chip>
-        <!-- </router-link> -->
       </div>
 
       <!-- 声优 -->
       <div class="q-px-none q-pt-sm q-py-sm">
-        <router-link v-for="(va, index) in metadata.vas" :to="`/works?keyword=${va.name}`" :key="index">
-          <q-chip square size="md" class="shadow-4" color="teal" text-color="white">
-            {{ va.name }}
-          </q-chip>
-        </router-link>
+        <q-chip
+          v-for="(va, index) in metadata.vas"
+          :key="index"
+          square
+          size="md"
+          class="shadow-4"
+          color="teal"
+          text-color="white"
+          @click.native="toTagSearch(va.name)"
+          style="cursor: pointer;"
+        >
+          {{ va.name }}
+        </q-chip>
       </div>
 
       <q-btn-dropdown dense class="q-mt-sm shadow-4 q-mx-xs q-pl-sm" color="cyan" label="标记进度">
@@ -168,8 +183,12 @@
 
       <q-btn dense @click="showReviewDialog = true" color="cyan q-mt-sm shadow-4 q-mx-xs q-px-sm" label="写评论" />
 
-      <WriteReview v-if="showReviewDialog" @closed="processReview" :workid="metadata.id" :metadata="metadata">
-      </WriteReview>
+      <WriteReview
+        v-if="showReviewDialog"
+        @closed="processReview"
+        :workid="metadata.id"
+        :metadata="metadata"
+      ></WriteReview>
     </div>
   </div>
 </template>
@@ -297,7 +316,8 @@ export default {
     },
 
     toTagSearch(tagName) {
-      if (tagName !== this.$q.localStorage.getItem('keywords').join(';')) {
+      console.log('tag', this.$q.sessionStorage.getItem('keyword'));
+      if (tagName !== this.$q.sessionStorage.getItem('keyword').join(';')) {
         this.$router.push({ name: 'works', query: { keyword: tagName } });
       }
     },

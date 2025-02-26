@@ -39,22 +39,19 @@
             <q-icon size="34px" v-else-if="item.type === 'text'" color="info" name="description" />
             <q-icon size="34px" v-else-if="item.type === 'image'" color="orange" name="photo" />
             <q-icon size="34px" v-else-if="item.type === 'other'" color="info" name="description" />
-            <q-btn
-              v-else
-              round
-              dense
-              color="primary"
-              :icon="playIcon(item.hash)"
-              @click="onClickPlayButton(item.hash)"
-            />
+            <q-btn v-else round dense color="primary" :icon="playIcon(item.hash)" @click="onClickPlayButton(item)" />
           </q-item-section>
 
           <q-item-section>
             <q-item-label lines="2">{{ item.title }}</q-item-label>
             <q-item-label v-if="item.children" caption lines="1">{{ `${item.children.length} 项目` }}</q-item-label>
 
-            <!-- 音频文件时长 -->
-            <q-item-label v-if="item.type === 'audio' && typeof item.duration === 'number'" caption lines="1">
+            <!-- 媒体文件时长 -->
+            <q-item-label
+              v-if="['audio', 'video'].includes(item.type) && typeof item.duration === 'number'"
+              caption
+              lines="1"
+            >
               <!-- <q-icon size="0.8rem" name="schedule" class="q-mr-xs" /> -->
               {{ formatSeconds(item.duration) }}
             </q-item-label>
@@ -187,13 +184,18 @@ export default {
     },
 
     onClickItem(item) {
-      const ext = this.getFileExt(item.title);
       if (item.type === 'folder') {
         this.path.push(item.title);
-      } else if (['text', 'image'].includes(item.type) || ['mp4', 'mkv'].includes(ext)) {
+      } else if (item.type === 'text') {
         this.openFile(item);
+      } else if (item.type === 'video' || item.type === 'image') {
+        if (this.isViewer) {
+          this.openViewer(item);
+        } else {
+          this.openFile(item);
+        }
       } else if (item.type === 'other') {
-        this.openFile(item, true);
+        this.download(item);
       } else if (this.currentPlayingFile.hash !== item.hash) {
         this.$store.commit('AudioPlayer/SET_QUEUE', {
           queue: this.queue.concat(),
@@ -203,22 +205,23 @@ export default {
       }
     },
 
-    onClickPlayButton(hash) {
-      const nextFileIndex = this.queue.findIndex(file => file.hash === hash);
-      const nextFile = this.queue[nextFileIndex];
-      const ext = this.getFileExt(nextFile.title);
-      if (!['mp4', 'mkv'].includes(ext)) {
-        if (this.currentPlayingFile.hash === hash) {
+    onClickPlayButton(item) {
+      if (item.type === 'audio') {
+        if (this.currentPlayingFile.hash === item.hash) {
           this.$store.commit('AudioPlayer/TOGGLE_PLAYING');
         } else {
           this.$store.commit('AudioPlayer/SET_QUEUE', {
             queue: this.queue.concat(),
-            index: this.queue.findIndex(file => file.hash === hash),
+            index: this.queue.findIndex(file => file.hash === item.hash),
             resetPlaying: true
           });
         }
       } else {
-        this.openFile(nextFile);
+        if (this.isViewer) {
+          this.openViewer(item);
+        } else {
+          this.openFile(item);
+        }
       }
     },
 
@@ -230,34 +233,29 @@ export default {
       this.$store.commit('AudioPlayer/PLAY_NEXT', file);
     },
 
-    openFile(file, isDownload = false) {
-      if (this.isViewer) {
-        this.openViewer(file);
-      } else {
-        const link = document.createElement('a');
-        link.href = this.getMediaUrl(file, isDownload);
-        link.target = '_blank';
-        link.click();
-      }
+    openFile(file) {
+      const token = this.$q.localStorage.getItem('jwt-token') || '';
+      // Fallback to old API for an old backend
+      const link = document.createElement('a');
+      link.href = `${file.mediaStreamUrl}?token=${token}`;
+      link.target = '_blank';
+      link.click();
+    },
+    download(file) {
+      const token = this.$q.localStorage.getItem('jwt-token') || '';
+      // Fallback to old API for an old backend
+      const link = document.createElement('a');
+      link.href = `${file.mediaDownloadUrl}?token=${token}`;
+      link.target = '_blank';
+      link.click();
     },
     // 图片&视频查看器
     openViewer(file) {
       this.showViewer = true;
       this.viewerFiles = this.fatherFolder.filter(item => {
-        return item.type === 'image' || ['mp4', 'mkv'].includes(this.getFileExt(item.title));
+        return ['image', 'video'].includes(item.type);
       });
       this.viewerFileIndex = this.viewerFiles.findIndex(item => item.hash === file.hash);
-    },
-
-    getMediaUrl(file, isDownload = false) {
-      // Fallback to old API for an old backend
-      let url;
-      if (isDownload === true) {
-        url = file.mediaDownloadUrl ? file.mediaDownloadUrl : `/api/media/download/${file.hash}`;
-      } else {
-        url = file.mediaStreamUrl ? file.mediaStreamUrl : `/api/media/stream/${file.hash}`;
-      }
-      return url;
     },
 
     getFileExt(val) {

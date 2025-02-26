@@ -179,10 +179,10 @@ export default {
     },
 
     keywords(newKeywords) {
-      this.$q.localStorage.set('keywords', newKeywords);
+      this.$q.sessionStorage.set('keyword', newKeywords);
     },
 
-    '$route.query': {
+    '$route.query': { 
       handler: function(query) {
         const keyword = query.keyword ? query.keyword : '';
         if (this.$route.path === '/works' && keyword !== this.keywords.join(';')) {
@@ -197,6 +197,8 @@ export default {
     init() {
       if (this.$route.query.keyword) {
         this.keywords = this.$route.query.keyword.split(';');
+      } else {
+        this.$q.sessionStorage.remove('keyword');
       }
       if (this.$q.localStorage.has('showMode')) {
         this.showMode = this.$q.localStorage.getItem('showMode');
