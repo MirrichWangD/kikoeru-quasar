@@ -164,7 +164,7 @@ export default {
 
   mounted() {
     document.addEventListener('keydown', this.handleKeydown);
-    if (this.playing) {
+    if (this.files[this.currentIndex].type === 'video' && this.playing) {
       this.$store.commit('AudioPlayer/TOGGLE_PLAYING');
     }
   },
