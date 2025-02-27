@@ -47,9 +47,6 @@ export default {
       // New API
       if (this.currentPlayingFile.mediaStreamUrl) {
         return `${this.currentPlayingFile.mediaStreamUrl}?token=${token}`
-      } else if (this.currentPlayingFile.hash) {
-        // Fallback to be compatible with old backend
-        return `/api/media/stream/${this.currentPlayingFile.hash}?token=${token}`
       } else {
         return ""
       }
@@ -269,11 +266,10 @@ export default {
           if (response.data.result) {
             // 有lrc歌词文件
             this.lrcAvailable = true;
-            console.log('读入歌词');
-            const lrcUrl = `/api/media/stream/${response.data.hash}?token=${token}`;
+            const lrcUrl = `/api/media/stream/${response.data.mediaPath}?token=${token}`;
             this.$axios.get(lrcUrl)
               .then(response => {
-                console.log('歌词读入成功');
+                console.log('LRC file loaded');
                 this.lrcObj.setLyric(response.data);
                 this.lrcObj.play(this.player.currentTime * 1000);
               });

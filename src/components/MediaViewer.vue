@@ -42,7 +42,7 @@
         }"
       >
         <div class="absolute-left q-ml-md">
-          <q-btn flat dense icon="arrow_left" @click="clickPrevious" style="top: 50%; z-index: 1;" />
+          <q-btn flat dense icon="arrow_left" @click="previous" style="top: 50%; z-index: 1;" />
         </div>
         <!-- 中心大图/视频 -->
         <div class="row justify-center items-center content-container" ref="fullscreenContainer">
@@ -52,7 +52,7 @@
             class="content"
             :src="getMediaUrl(files[currentIndex])"
             :style="contentStyle"
-            @dblclick="clickFullscreen"
+            @dblclick="fullscreen"
             contain
           />
           <video
@@ -69,7 +69,7 @@
           />
         </div>
         <div class="absolute-right q-mr-md">
-          <q-btn flat dense icon="arrow_right" @click="clickNext" style="top: 50%; z-index: 1;" />
+          <q-btn flat dense icon="arrow_right" @click="next" style="top: 50%; z-index: 1;" />
         </div>
       </q-card-section>
       <q-card-section
@@ -106,13 +106,13 @@
       <!-- controls -->
       <q-card-section class="row justify-center items-center q-ma-sm">
         <div class="absolute-left">
-          <q-btn flat dense icon="auto_awesome_motion" @click="clickThumbnail" />
-          <q-btn flat dense icon="pageview" @click="clickNewTabPage" />
-          <q-btn flat dense icon="download" @click="clickDownload" />
+          <q-btn flat dense icon="auto_awesome_motion" @click="thumbnail" />
+          <q-btn flat dense icon="pageview" @click="newTabPage" />
+          <q-btn flat dense icon="download" @click="download" />
         </div>
         <div class="text-subtitle1 absolute-center">{{ currentIndex + 1 }} / {{ files.length }}</div>
         <div class="absolute-right">
-          <q-btn flat dense icon="open_in_full" @click="clickFullscreen" />
+          <q-btn flat dense icon="open_in_full" @click="fullscreen" />
         </div>
       </q-card-section>
     </q-card>
@@ -164,6 +164,7 @@ export default {
 
   mounted() {
     document.addEventListener('keydown', this.handleKeydown);
+    document.addEventListener('wheel', this.handleWheel);
     if (this.files[this.currentIndex].type === 'video' && this.playing) {
       this.$store.commit('AudioPlayer/TOGGLE_PLAYING');
     }
@@ -171,6 +172,7 @@ export default {
 
   beforeDestroy() {
     document.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener('wheel', this.handleWheel);
   },
 
   methods: {
@@ -188,7 +190,7 @@ export default {
           // 计算需要滚动的位置，让缩略图在视图中央
           const scrollPosition = thumbnailOffsetLeft - scrollAreaWidth / 2 + thumbnailWidth / 2;
 
-          // console.log("scroll", scrollPosition);
+          // console.log('scroll', scrollPosition);
           // 设置滚动行为，让缩略图居中
           this.$refs.scrollArea.setScrollPosition('horizontal', scrollPosition, 300);
         }
@@ -196,35 +198,35 @@ export default {
     },
 
     getMediaUrl(file, isDownload = false) {
+      const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
-      let url;
-      if (isDownload === true) {
-        url = file.mediaDownloadUrl ? file.mediaDownloadUrl : `/api/media/download/${file.hash}`;
-      } else {
-        url = file.mediaStreamUrl ? file.mediaStreamUrl : `/api/media/stream/${file.hash}`;
-      }
+      const url = `${isDownload ? file.mediaDownloadUrl : file.mediaStreamUrl}?token=${token}`;
       return url;
     },
 
-    clickPrevious() {
+    previous() {
       if (this.currentIndex > 0) {
         this.currentIndex--;
-        if (this.showThumbnail) {
-          this.scrollToThumbnail(this.currentIndex);
-        }
+      } else {
+        this.currentIndex = this.files.length - 1;
+      }
+      if (this.showThumbnail) {
+        this.scrollToThumbnail(this.currentIndex);
       }
     },
 
-    clickNext() {
+    next() {
       if (this.currentIndex < this.files.length - 1) {
         this.currentIndex++;
-        if (this.showThumbnail) {
-          this.scrollToThumbnail(this.currentIndex);
-        }
+      } else {
+        this.currentIndex = 0;
+      }
+      if (this.showThumbnail) {
+        this.scrollToThumbnail(this.currentIndex);
       }
     },
 
-    clickNewTabPage() {
+    newTabPage() {
       const file = this.files[this.currentIndex];
       const link = document.createElement('a');
       link.href = this.getMediaUrl(file);
@@ -232,15 +234,15 @@ export default {
       link.click();
     },
 
-    clickDownload() {
+    download() {
       const file = this.files[this.currentIndex];
       const link = document.createElement('a');
       link.href = this.getMediaUrl(file, true);
-      link.setAttribute('download', file.title); // 可选: 提供下载时的默认文件名
+      link.target = '_blank';
       link.click();
     },
 
-    clickFullscreen() {
+    fullscreen() {
       if (this.files[this.currentIndex].type === 'audio') {
         const video = document.getElementById('video');
         if (video.requestFullscreen) {
@@ -266,7 +268,7 @@ export default {
       }
     },
 
-    clickThumbnail() {
+    thumbnail() {
       this.showThumbnail = !this.showThumbnail;
       if (this.showThumbnail) this.scrollToThumbnail(this.currentIndex);
     },
@@ -286,11 +288,19 @@ export default {
       }
     },
 
+    handleWheel(event) {
+      if (event.deltaY < 0) {
+        this.previous();
+      } else if (event.deltaY > 0) {
+        this.next();
+      }
+    },
+
     handleKeydown(event) {
       if (event.key === 'PageDown') {
-        this.clickPrevious();
+        this.previous();
       } else if (event.key === 'PageUp') {
-        this.clickNext();
+        this.next();
       }
     }
   }
@@ -343,6 +353,7 @@ export default {
   }
   height: 100px;
   overflow-x: auto;
+  will-change: transform;
 }
 .thumbnail-item {
   position: relative;

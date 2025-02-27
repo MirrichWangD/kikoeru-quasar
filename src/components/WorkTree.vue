@@ -75,7 +75,7 @@
                 <q-item-section>下一曲播放</q-item-section>
               </q-item>
 
-              <q-item clickable @click="openFile(item, true)">
+              <q-item clickable @click="download(item)">
                 <q-item-section>下载文件</q-item-section>
               </q-item>
             </q-list>

@@ -145,7 +145,9 @@ export default {
       ],
 
       // 搜索
-      keywords: []
+      keywords: [],
+
+      lastQuery: { page: 1, keyword: '' }
     };
   },
 
@@ -182,11 +184,19 @@ export default {
       this.$q.sessionStorage.set('keyword', newKeywords);
     },
 
-    '$route.query': { 
+    '$route.query': {
       handler: function(query) {
-        const keyword = query.keyword ? query.keyword : '';
-        if (this.$route.path === '/works' && keyword !== this.keywords.join(';')) {
-          this.keywords = keyword !== '' ? keyword.split(';') : [];
+        const page = parseInt(query.page) || 1;
+        const keyword = query.keyword || '';
+        if (this.$route.path === '/works' && (keyword !== this.lastQuery.keyword || page !== this.lastQuery.page)) {
+          console.log('get page from query', query);
+          if (keyword !== this.lastQuery.keyword) {
+            this.lastQuery.keyword = keyword;
+            this.keywords = keyword ? keyword.split(';') : [];
+          }
+          if (page !== this.lastQuery.page) {
+            this.lastQuery.page = page;
+          }
           this.reset();
         }
       }
@@ -197,8 +207,12 @@ export default {
     init() {
       if (this.$route.query.keyword) {
         this.keywords = this.$route.query.keyword.split(';');
+        this.lastQuery.keyword = this.$route.query.keyword;
       } else {
         this.$q.sessionStorage.remove('keyword');
+      }
+      if (this.$route.query.page) {
+        this.lastQuery.page = parseInt(this.$route.query.page);
       }
       if (this.$q.localStorage.has('showMode')) {
         this.showMode = this.$q.localStorage.getItem('showMode');
@@ -271,25 +285,19 @@ export default {
       console.log('switch lyric status:', newLyricStatus);
       this.lyricStatus = newLyricStatus;
       this.page = 1;
-      const query = {};
-      if (this.$route.query) {
-        if (this.$route.query.keyword) {
-          query.keyword = this.$route.query.keyword;
-        }
-        if (this.$route.query.page) {
-          this.$router.push({ query: query });
-        }
+      const query = { ...this.$route.query };
+      if (this.$route.query.page) {
+        delete query.page;
+        this.$router.push({ query: query });
+        return;
       }
-      if (this.$route.query.page === undefined) {
-        this.reset();
-      }
+      this.reset();
     },
 
     onPageChange(page) {
       console.log(`change page to: ${page}`);
       this.$router.push({ query: { ...this.$route.query, page: page } });
       this.page = page;
-      this.reset();
     },
 
     // 搜索功能
