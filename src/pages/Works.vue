@@ -171,6 +171,7 @@ export default {
     sortOption(newSortOption) {
       const localSortOption = this.$q.localStorage.getItem('sortOption') || { label: '最新收录' };
       if (newSortOption.label !== localSortOption.label) {
+        console.log('switch sort to:', `${newSortOption.order} ${newSortOption.sort}`)
         this.$q.localStorage.set('sortOption', newSortOption);
         this.reset();
       }

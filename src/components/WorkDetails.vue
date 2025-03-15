@@ -316,11 +316,11 @@ export default {
     },
 
     toTagSearch(tagName) {
-      console.log('tag', this.$q.sessionStorage.getItem('keyword'));
-      if (tagName !== this.$q.sessionStorage.getItem('keyword').join(';')) {
+      const keyword = this.$q.sessionStorage.has('keyword') ? this.$q.sessionStorage.getItem('keyword').join(';') : '';
+      if (tagName !== keyword) {
         this.$router.push({ name: 'works', query: { keyword: tagName } });
       }
-    },
+    },  
 
     formatSeconds(seconds) {
       let h = `${Math.floor(seconds / 3600)}`.padStart(2, '0');

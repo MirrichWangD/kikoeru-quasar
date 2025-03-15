@@ -231,7 +231,8 @@ export default {
         });
     },
     toTagSearch(tagName) {
-      if (tagName !== this.$q.sessionStorage.getItem('keyword').join(';')) {
+      const keyword = this.$q.sessionStorage.has('keyword') ? this.$q.sessionStorage.getItem('keyword').join(';') : '';
+      if (tagName !== keyword) {
         this.$router.push({ name: 'works', query: { keyword: tagName } });
       }
     },
