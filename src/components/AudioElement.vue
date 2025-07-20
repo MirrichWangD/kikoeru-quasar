@@ -46,7 +46,7 @@ export default {
       const token = this.$q.localStorage.getItem('jwt-token') || ''
       // New API
       if (this.currentPlayingFile.mediaStreamUrl) {
-        return `${this.currentPlayingFile.mediaStreamUrl}?token=${token}`
+        return `${this.currentPlayingFile.mediaStreamUrl}?token=${token}`.replace("#", "%23")
       } else {
         return ""
       }

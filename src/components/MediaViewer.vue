@@ -200,7 +200,7 @@ export default {
     getMediaUrl(file, isDownload = false) {
       const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
-      const url = `${isDownload ? file.mediaDownloadUrl : file.mediaStreamUrl}?token=${token}`;
+      const url = `${isDownload ? file.mediaDownloadUrl : file.mediaStreamUrl}?token=${token}`.replace("#", "%23");
       return url;
     },
 

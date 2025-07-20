@@ -237,7 +237,7 @@ export default {
       const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
       const link = document.createElement('a');
-      link.href = `${file.mediaStreamUrl}?token=${token}`;
+      link.href = `${file.mediaStreamUrl}?token=${token}`.replace("#", "%23");
       link.target = '_blank';
       link.click();
     },
@@ -245,7 +245,7 @@ export default {
       const token = this.$q.localStorage.getItem('jwt-token') || '';
       // Fallback to old API for an old backend
       const link = document.createElement('a');
-      link.href = `${file.mediaDownloadUrl}?token=${token}`;
+      link.href = `${file.mediaDownloadUrl}?token=${token}`.replace("#", "%23");
       link.target = '_blank';
       link.click();
     },
